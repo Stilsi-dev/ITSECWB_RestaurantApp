@@ -1,0 +1,269 @@
+/* ===========================
+   GLOBAL RESET & BASE STYLES
+   =========================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f9f9f9;
+    color: #333;
+    padding: 20px;
+}
+
+h1, h2 {
+    color: #2c3e50;
+}
+
+a {
+    text-decoration: none;
+    color: #2980b9;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* ===========================
+   NAVBAR
+   =========================== */
+.navbar {
+    background: #2c3e50;
+    color: white;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-left {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between elements */
+}
+
+.nav-right span {
+    font-size: 14px;
+}
+
+.nav-right a {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: white;
+    font-weight: bold;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: background 0.3s;
+}
+
+/* Dashboard button */
+.nav-right a.dashboard-link {
+    background: #3498db;
+}
+.nav-right a.dashboard-link:hover {
+    background: #2980b9;
+}
+
+/* Logout button */
+.nav-right a.logout-link {
+    background: #e74c3c;
+}
+.nav-right a.logout-link:hover {
+    background: #c0392b;
+}
+
+/* ===========================
+   BUTTONS
+   =========================== */
+button, .btn-primary, .btn-secondary, .btn-link, .btn-small {
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+}
+
+.btn-primary {
+    background: #3498db;
+    color: white;
+    padding: 10px;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+}
+
+.btn-secondary {
+    background: #ecf0f1;
+    color: #2c3e50;
+    padding: 10px;
+}
+
+.btn-secondary:hover {
+    background: #d0d3d4;
+}
+
+.btn-link {
+    background: #3498db;
+    color: white;
+    padding: 8px 12px;
+}
+
+.btn-small {
+    padding: 6px 10px;
+    font-size: 13px;
+    height: 32px;
+}
+
+.btn-small.danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-small.primary {
+    background: #007bff;
+    color: white;
+}
+
+/* ===========================
+   CONTAINERS
+   =========================== */
+.form-container,
+.table-container,
+.dashboard-container {
+    max-width: 800px;
+    margin: 40px auto;
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.main-content {
+    margin-top: 20px;
+}
+
+/* ===========================
+   NOTIFICATION (Bottom Center)
+   =========================== */
+.notification-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.notification {
+    padding: 12px 20px;
+    border-radius: 6px;
+    color: white;
+    font-weight: bold;
+    background: #2ecc71; /* default success */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    animation: fadeOut 5s forwards;
+    min-width: 280px;
+    text-align: center;
+}
+
+/* Color variations based on message tags */
+.notification.error {
+    background: #e74c3c;
+}
+.notification.success {
+    background: #2ecc71;
+}
+.notification.warning {
+    background: #f39c12;
+}
+
+/* Fade out animation */
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* ===========================
+   FORM INPUTS (Match fonts)
+   =========================== */
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group textarea {
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+    background: #f7faff;
+    font-family: Arial, sans-serif;
+}
+
+/* ===========================
+   TOGGLE SWITCH FOR AVAILABLE
+   =========================== */
+.toggle-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.toggle-group label:first-child {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 24px;
+}
+
+.switch input {
+    display: none;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    border-radius: 24px;
+    transition: 0.3s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.switch input:checked + .slider {
+    background-color: #2ecc71;
+}
+
+.switch input:checked + .slider:before {
+    transform: translateX(22px);
+}

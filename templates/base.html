@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Restaurant System{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/global.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="nav-left">
+            <span>🍽️ Restaurant System</span>
+        </div>
+        <div class="nav-right">
+            <span>Hi, <strong>{{ user.username }}</strong></span>
+            <a href="{% url 'dashboard' %}" class="dashboard-link">🏠 Dashboard</a>
+            <a href="{% url 'logout' %}" class="logout-link">🔒 Logout</a>
+        </div>
+    </div>
+
+    <!-- FLOATING NOTIFICATIONS -->
+    <div class="notification-container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="notification {% if message.tags %}{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        {% block content %}{% endblock %}
+    </div>
+
+    {% block extra_js %}{% endblock %}
+
+    <!-- Auto-hide notifications after 5s -->
+    <script>
+        setTimeout(() => {
+            document.querySelectorAll('.notification').forEach(notif => {
+                notif.style.transition = 'opacity 0.5s';
+                notif.style.opacity = '0';
+                setTimeout(() => notif.remove(), 500);
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

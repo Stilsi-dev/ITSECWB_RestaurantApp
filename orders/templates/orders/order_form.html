@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/orders.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="order-container">
+    <h2><i class="fas fa-shopping-cart"></i> Place New Order</h2>
+
+    <form method="POST" id="order-form">
+        {% csrf_token %}
+
+        <!-- Table Number -->
+        <div class="form-group table-number">
+            <label for="table_number">Table Number:</label>
+            <input type="text" name="table_number" id="table_number" placeholder="Enter Table Number" required>
+        </div>
+
+        <!-- Item Selection Grid -->
+        <div class="form-group">
+            <label class="section-title">Select Items:</label>
+            <div class="items-grid">
+                {% for item in menu_items %}
+                <div class="card {% if not item.is_available %}unavailable{% endif %}">
+                    <input type="checkbox" id="item-{{ item.id }}" name="items" value="{{ item.id }}" {% if not item.is_available %}disabled{% endif %}>
+
+                    <!-- Selected Badge -->
+                    <div class="selected-badge">✔ Selected</div>
+
+                    <label for="item-{{ item.id }}">
+                        <img src="{{ item.image.url }}" alt="{{ item.name }}" class="menu-image">
+                        <h4 class="item-title">{{ item.name }}</h4>
+                        <p class="item-description">{{ item.description }}</p>
+                        <div class="price">₱{{ item.price }}</div>
+                    </label>
+
+                    <!-- Quantity Controls -->
+                    <div class="quantity-controls">
+                        <button type="button" class="qty-btn" data-action="minus" data-id="{{ item.id }}">-</button>
+                        <input type="number" name="quantity_{{ item.id }}" value="1" min="1" class="qty-input" disabled>
+                        <button type="button" class="qty-btn" data-action="plus" data-id="{{ item.id }}">+</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="order-summary">
+            <h3><i class="fas fa-receipt"></i> Order Summary</h3>
+            <ul id="summary-list"></ul>
+            <div class="summary-total">
+                <span>Total:</span> <strong id="summary-total">₱0.00</strong>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="button-row">
+            <button type="submit" class="btn-primary">Submit Order</button>
+            <a href="{% url 'orders:list' %}" class="btn-secondary">← Back</a>
+        </div>
+    </form>
+</div>
+
+<!-- JavaScript -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const checkboxes = document.querySelectorAll(".card input[type='checkbox']");
+    const summaryList = document.getElementById("summary-list");
+    const summaryTotal = document.getElementById("summary-total");
+
+    function formatCurrency(value) {
+        return "₱" + value.toFixed(2);
+    }
+
+    function updateSummary() {
+        summaryList.innerHTML = "";
+        let total = 0;
+
+        checkboxes.forEach((checkbox) => {
+            if (checkbox.checked) {
+                const card = checkbox.closest(".card");
+                const name = card.querySelector(".item-title").innerText;
+                const price = parseFloat(card.querySelector(".price").innerText.replace("₱", ""));
+                const qtyInput = card.querySelector(".qty-input");
+                const qty = parseInt(qtyInput.value);
+
+                const li = document.createElement("li");
+                li.innerText = `${name} x ${qty} - ${formatCurrency(price * qty)}`;
+                summaryList.appendChild(li);
+
+                total += price * qty;
+            }
+        });
+
+        summaryTotal.innerText = formatCurrency(total);
+    }
+
+    // Toggle quantity and card selection styles
+    checkboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", function () {
+            const card = this.closest(".card");
+            const badge = card.querySelector(".selected-badge");
+            const qtyInput = card.querySelector(".qty-input");
+
+            qtyInput.disabled = !this.checked;
+            if (this.checked) {
+                card.classList.add("selected");
+                badge.style.display = "block";
+            } else {
+                card.classList.remove("selected");
+                badge.style.display = "none";
+            }
+            updateSummary();
+        });
+    });
+
+    // Handle quantity buttons
+    document.querySelectorAll(".qty-btn").forEach((btn) => {
+        btn.addEventListener("click", function () {
+            const id = this.dataset.id;
+            const action = this.dataset.action;
+            const qtyInput = document.querySelector(`input[name='quantity_${id}']`);
+            let qty = parseInt(qtyInput.value);
+
+            if (action === "minus" && qty > 1) qty--;
+            if (action === "plus") qty++;
+
+            qtyInput.value = qty;
+            updateSummary();
+        });
+    });
+});
+</script>
+{% endblock %}

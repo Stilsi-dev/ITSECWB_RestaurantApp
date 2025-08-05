@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h2>👤 Customer Dashboard</h2>
+        <p class="welcome-text">Welcome, <strong>{{ user.username }}</strong>!</p>
+    </div>
+
+    <div class="dashboard-links horizontal">
+        <a href="{% url 'order_list' %}" class="btn-dashboard">📋 My Orders</a>
+        <a href="{% url 'order_create' %}" class="btn-dashboard">🛒 Place a New Order</a>
+        <a href="{% url 'logout' %}" class="btn-dashboard logout">🚪 Logout</a>
+    </div>
+</div>
+{% endblock %}

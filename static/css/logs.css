@@ -1,0 +1,98 @@
+/* ===========================
+   LOGS PAGE STYLES (Unified with Orders/Menu)
+   =========================== */
+
+/* Table container */
+.table-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+}
+
+.table-container h2 {
+    display: flex;
+    align-items: center;
+    font-size: 22px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+/* Logs table */
+.logs-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.logs-table thead {
+    background: #2c3e50;
+    color: #ffffff;
+}
+
+.logs-table th {
+    text-align: left;
+    padding: 12px 15px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.logs-table td {
+    padding: 12px 15px;
+    font-size: 14px;
+    border-bottom: 1px solid #ececec;
+    color: #333;
+}
+
+/* Row hover */
+.logs-table tbody tr:hover {
+    background: #f9fcff;
+    transition: background 0.3s;
+}
+
+/* Status badges */
+.status {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 14px;
+    text-align: center;
+}
+
+.status.success {
+    background: #28c76f;
+    color: white;
+    border: none;
+}
+
+.status.fail {
+    background: #ea5455;
+    color: white;
+    border: none;
+}
+
+/* Empty state */
+.empty {
+    text-align: center;
+    padding: 20px;
+    font-size: 14px;
+    color: #888;
+}
+
+.filter-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.filter-form select, .filter-form button, .filter-form a {
+    padding: 8px 10px;
+    font-size: 14px;
+}

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/accounts.css' %}">
+<style>
+/* Error box styling */
+.error-box {
+    background: #e74c3c;
+    color: white;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Password strength indicator */
+.password-strength {
+    font-size: 12px;
+    margin-top: 5px;
+    text-align: left;
+}
+.strength-weak { color: #e74c3c; }
+.strength-medium { color: #f39c12; }
+.strength-strong { color: #27ae60; }
+
+/* Error text for fields */
+.field-error {
+    font-size: 12px;
+    color: #e74c3c;
+    margin-top: 3px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2 class="form-title">📝 Register</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="error-box">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Username -->
+        <div class="form-group">
+            <label for="id_username">Username <span style="color:red">*</span></label>
+            {{ form.username }}
+            {% for error in form.username.errors %}
+                <div class="field-error">⚠️ {{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+            <label for="id_email">Email <span style="color:red">*</span></label>
+            {{ form.email }}
+            {% for error in form.email.errors %}
+                <div class="field-error">⚠️ {{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+            <label for="id_password1">Password <span style="color:red">*</span></label>
+            {{ form.password1 }}
+            <div id="password-strength" class="password-strength"></div>
+            {% for error in form.password1.errors %}
+                <div class="field-error">⚠️ {{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="form-group">
+            <label for="id_password2">Confirm Password <span style="color:red">*</span></label>
+            {{ form.password2 }}
+            {% for error in form.password2.errors %}
+                <div class="field-error">⚠️ {{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="btn-primary">Register</button>
+
+        <div class="link-text">
+            Already have an account? <a href="{% url 'login' %}">Login here</a>.
+        </div>
+    </form>
+</div>
+
+<script>
+/* Password Strength Checker */
+const passwordInput = document.getElementById('id_password1');
+const strengthText = document.getElementById('password-strength');
+
+if (passwordInput) {
+    passwordInput.addEventListener('input', function() {
+        const password = passwordInput.value;
+        let strength = 0;
+
+        if (password.length >= 8) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/[a-z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+        if (strength === 0) {
+            strengthText.textContent = "";
+        } else if (strength <= 2) {
+            strengthText.textContent = "Weak password";
+            strengthText.className = "password-strength strength-weak";
+        } else if (strength <= 4) {
+            strengthText.textContent = "Medium strength";
+            strengthText.className = "password-strength strength-medium";
+        } else {
+            strengthText.textContent = "Strong password";
+            strengthText.className = "password-strength strength-strong";
+        }
+    });
+}
+</script>
+{% endblock %}

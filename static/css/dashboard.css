@@ -1,0 +1,66 @@
+/* ===========================
+   DASHBOARD ENHANCEMENTS (Admin & Manager)
+   =========================== */
+.dashboard-container {
+    max-width: 500px;
+    margin: 60px auto;
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.dashboard-header h2 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 24px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 8px;
+}
+
+.dashboard-header .welcome-text {
+    color: #555;
+    font-size: 16px;
+    margin-bottom: 25px;
+}
+
+/* Dashboard links container */
+.dashboard-links {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Dashboard buttons */
+.btn-dashboard {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    background: #3498db;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.3s;
+    min-width: 200px;
+}
+
+.btn-dashboard:hover {
+    background: #2980b9;
+}
+
+/* Special styling for logout */
+.btn-dashboard.logout {
+    background: #e74c3c;
+}
+
+.btn-dashboard.logout:hover {
+    background: #c0392b;
+}

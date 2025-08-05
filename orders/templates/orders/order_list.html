@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/orders.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="table-container">
+    <div class="header-row">
+        <h2>📦 Orders</h2>
+        {% if user.role == 'customer' %}
+            <a href="{% url 'orders:create' %}" class="btn-primary">+ Place New Order</a>
+        {% endif %}
+    </div>
+
+    {% if orders %}
+    <div class="orders-list">
+        {% for order in orders %}
+        <div class="order-card">
+            <div class="order-header">
+                <div class="order-id">#{{ order.id }}</div>
+                <div class="order-status 
+                    {% if order.status == 'pending' %}pending
+                    {% elif order.status == 'preparing' %}preparing
+                    {% elif order.status == 'completed' %}completed
+                    {% elif order.status == 'cancelled' %}cancelled{% endif %}">
+                    {{ order.status|title }}
+                </div>
+            </div>
+            
+            <div class="order-meta">
+                <div class="customer-info">
+                    <span class="customer-avatar">{{ order.customer.username|first|upper }}</span>
+                    <span class="customer-name">{{ order.customer.username }}</span>
+                </div>
+                <span class="order-date">{{ order.created_at|date:"M d, Y, g:i a" }}</span>
+            </div>
+
+            <div class="order-items">
+                {% for item in order.items.all %}
+                    <div class="order-item-card">
+                        {% if item.image %}
+                            <img src="{{ item.image.url }}" alt="{{ item.name }}">
+                        {% else %}
+                            <div class="no-img">No Img</div>
+                        {% endif %}
+                        <div class="order-item-info">
+                            <span class="item-name">{{ item.name }}</span>
+                            <span class="item-description">{{ item.description|truncatechars:50 }}</span>
+                        </div>
+                    </div>
+                {% empty %}
+                    <span class="text-muted">No items</span>
+                {% endfor %}
+            </div>
+
+            <div class="order-actions">
+                {% if user.role == 'customer' %}
+                    {% if order.status == 'pending' %}
+                        <form action="{% url 'order_cancel' order.id %}" method="post"
+                              onsubmit="return confirm('Cancel this order?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-small danger">Cancel</button>
+                        </form>
+                    {% else %}
+                        <span class="text-muted">No actions available</span>
+                    {% endif %}
+                {% else %}
+                    {% if order.status == 'pending' %}
+                        <form action="{% url 'order_prepare' order.id %}" method="post"
+                              onsubmit="return confirm('Mark as preparing?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-small primary">Prepare</button>
+                        </form>
+                        <form action="{% url 'order_cancel' order.id %}" method="post"
+                              onsubmit="return confirm('Cancel this order?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-small danger">Cancel</button>
+                        </form>
+                    {% elif order.status == 'preparing' %}
+                        <form action="{% url 'order_complete' order.id %}" method="post"
+                              onsubmit="return confirm('Mark as completed?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-small success">Complete</button>
+                        </form>
+                    {% else %}
+                        <span class="text-muted">No actions</span>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+        <div class="empty-state">
+            <p>No orders found.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

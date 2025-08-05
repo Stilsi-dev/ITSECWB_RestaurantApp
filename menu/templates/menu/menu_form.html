@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/menu.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2 class="form-title">🍴 {% if form.instance.pk %} Edit Menu Item {% else %} Add Menu Item {% endif %}</h2>
+
+    {% if messages %}
+        <div class="notification-container">
+            {% for message in messages %}
+                <div class="notification {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" class="styled-form">
+        {% csrf_token %}
+        
+        <!-- Name -->
+        <div class="form-group">
+            <label for="id_name">Name</label>
+            {{ form.name }}
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+            <label for="id_description">Description</label>
+            {{ form.description }}
+        </div>
+
+        <!-- Price -->
+        <div class="form-group">
+            <label for="id_price">Price (₱)</label>
+            {{ form.price }}
+        </div>
+
+        <!-- Image Upload -->
+        <div class="form-group image-upload-group">
+            <label for="id_image">Image</label>
+            <div class="image-input-wrapper">
+                <!-- Hide the default input -->
+                {{ form.image }}
+                <button type="button" class="btn-preview" onclick="document.getElementById('id_image').click()">Choose Image</button>
+            </div>
+            <div id="image-preview-container">
+                {% if form.instance.image %}
+                    <img id="image-preview" src="{{ form.instance.image.url }}" alt="Preview">
+                {% else %}
+                    <img id="image-preview" style="display:none;" alt="Preview">
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Category Dropdown -->
+        <div class="form-group category-group">
+            <label for="id_category">Category</label>
+            <div class="category-select-wrapper">
+                {{ form.category }}
+            </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="form-group">
+            <label for="id_tags">Tags (comma-separated)</label>
+            {{ form.tags }}
+            <small>Example: spicy, vegan, gluten-free</small>
+        </div>
+
+        <!-- Available Toggle -->
+        <div class="form-group toggle-group">
+            <label for="id_is_available">Available</label>
+            <label class="switch">
+                {{ form.is_available }}
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <!-- Buttons -->
+        <div class="button-row">
+            <button type="submit" class="btn-primary">💾 Save</button>
+            <a href="{% url 'menu_list' %}" class="btn-secondary">← Back</a>
+        </div>
+    </form>
+</div>
+
+<!-- JS for Image Preview -->
+<script>
+document.getElementById('id_image').addEventListener('change', function(event) {
+    const [file] = event.target.files;
+    const preview = document.getElementById('image-preview');
+    if (file) {
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = 'block';
+    } else {
+        preview.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

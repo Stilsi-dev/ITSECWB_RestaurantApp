@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h2>🛡️ Administrator Dashboard</h2>
+        <p class="welcome-text">Welcome, <strong>{{ user.username }}</strong>!</p>
+    </div>
+
+    <div class="dashboard-links">
+        <a href="{% url 'menu_list' %}" class="btn-dashboard">📖 Manage Menu Items</a>
+        <a href="{% url 'order_list' %}" class="btn-dashboard">📜 View All Orders</a>
+        <a href="{% url 'manage_users' %}" class="btn-primary">⚙ Manage Users</a>
+        <a href="{% url 'admin_logs' %}" class="btn-dashboard">📑 View System Logs</a>
+        <a href="/admin/" class="btn-dashboard">⚙️ Django Admin (Advanced)</a>
+        <a href="{% url 'logout' %}" class="btn-dashboard logout">🚪 Logout</a>
+    </div>
+</div>
+{% endblock %}
