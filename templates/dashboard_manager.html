@@ -1,20 +1,27 @@
+{# templates/dashboard_manager.html #}
 {% extends "base.html" %}
 {% load static %}
+
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="dashboard-container">
-    <div class="dashboard-header">
-        <h2>🧑‍💼 Manager Dashboard</h2>
-        <p class="welcome-text">Welcome, <strong>{{ user.username }}</strong>!</p>
-    </div>
+  <div class="dashboard-header">
+    <h2>🧑‍💼 Manager Dashboard</h2>
+    <p class="welcome-text">Welcome, <strong>{{ user.username }}</strong>!</p>
+  </div>
 
-    <div class="dashboard-links">
-        <a href="{% url 'menu_list' %}" class="btn-dashboard">📖 Manage Menu Items</a>
-        <a href="{% url 'order_list' %}" class="btn-dashboard">📜 View All Orders</a>
-        <a href="{% url 'logout' %}" class="btn-dashboard logout">🚪 Logout</a>
-    </div>
+  <div class="dashboard-links">
+    <a href="{% url 'menu:list' %}" class="btn-dashboard">📖 Manage Menu Items</a>
+    <a href="{% url 'menu:create' %}" class="btn-dashboard">➕ Add Menu Item</a>
+
+    {# Adjust this to whatever names you used for orders #}
+    {# If you namespaced orders as app_name = "orders": #}
+    {# <a href="{% url 'orders:list' %}" class="btn-dashboard">📜 View All Orders</a> #}
+
+    <a href="{% url 'accounts:logout' %}" class="btn-dashboard logout">🚪 Logout</a>
+  </div>
 </div>
 {% endblock %}

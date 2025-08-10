@@ -9,26 +9,39 @@
 <div class="form-container">
     <h2 class="form-title">🔑 Login</h2>
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.non_field_errors }}
-
-        {% for field in form %}
-        <div class="form-group">
-            <label for="{{ field.id_for_label }}">
-                {{ field.label }}
-                {% if field.field.required %} <span style="color:red">*</span> {% endif %}
-            </label>
-            {{ field }}
-            {{ field.errors }}
+    {# Show any non-field errors from AuthenticationForm (e.g., bad credentials) #}
+    {% if form.non_field_errors %}
+        <div class="form-errors">
+            {{ form.non_field_errors }}
         </div>
-        {% endfor %}
+    {% endif %}
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {# Keep next so redirects after login work #}
+        {% if request.GET.next %}
+            <input type="hidden" name="next" value="{{ request.GET.next }}">
+        {% endif %}
+
+        <div class="form-group">
+            <label for="id_username">Username <span style="color:red">*</span></label>
+            <input type="text" name="username" id="id_username" required
+                   value="{{ form.data.username|default:'' }}">
+            {{ form.username.errors }}
+        </div>
+
+        <div class="form-group">
+            <label for="id_password">Password <span style="color:red">*</span></label>
+            <input type="password" name="password" id="id_password" required>
+            {{ form.password.errors }}
+        </div>
 
         <button type="submit" class="btn-primary">Login</button>
     </form>
 
     <div class="link-text">
-        Don't have an account? <a href="{% url 'register' %}">Register</a>
+        Don't have an account? <a href="{% url 'accounts:register' %}">Register</a>
     </div>
 </div>
 {% endblock %}

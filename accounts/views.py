@@ -1,140 +1,142 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, logout
-from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from .forms import RegisterForm, LoginForm
-from .models import User
-from logs.models import Log
+from django.contrib.auth import authenticate, login, logout, get_user_model
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
+from django.shortcuts import redirect, render
+from django.views.decorators.http import require_http_methods
+
+User = get_user_model()
 
 
-# Register
-def register_view(request):
-    if request.method == 'POST':
-        form = RegisterForm(request.POST)
-
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.role = 'customer'  # Set default role
-            user.save()
-
-            # Log successful registration
-            Log.objects.create(
-                user=user,
-                action="New user registered",
-                ip_address=request.META.get('REMOTE_ADDR'),
-                status='success'
-            )
-            messages.success(request, "✅ Account created successfully! Please login.")
-            return redirect('login')
-
-        else:
-            # Log failed registration
-            Log.objects.create(
-                user=None,
-                action="Failed registration attempt",
-                ip_address=request.META.get('REMOTE_ADDR'),
-                status='fail'
-            )
-            messages.error(request, "⚠️ Please correct the errors highlighted below.")
-    else:
-        form = RegisterForm()
-
-    return render(request, 'accounts/register.html', {'form': form})
-
-
-# Login
+@require_http_methods(["GET", "POST"])
 def login_view(request):
-    if request.method == 'POST':
-        form = LoginForm(request, data=request.POST)
+    """
+    Uses Django's AuthenticationForm for validation, but the template renders
+    plain <input> fields so the text boxes always show.
+    """
+    if request.user.is_authenticated:
+        return redirect("accounts:dashboard")
+
+    form = AuthenticationForm(request, data=request.POST or None)
+
+    if request.method == "POST":
         if form.is_valid():
             user = form.get_user()
-
-            if getattr(user, "is_locked", False):
-                messages.error(request, "🚫 Your account is locked. Please contact admin.")
-                Log.objects.create(
-                    user=user,
-                    action="Login attempt on locked account",
-                    ip_address=request.META.get('REMOTE_ADDR'),
-                    status='fail'
-                )
-                return redirect('login')
-
             login(request, user)
-
-            Log.objects.create(
-                user=user,
-                action="User logged in",
-                ip_address=request.META.get('REMOTE_ADDR'),
-                status='success'
-            )
-            return redirect('dashboard')
+            # Respect ?next= if present
+            nxt = request.GET.get("next") or request.POST.get("next")
+            return redirect(nxt or "accounts:dashboard")
         else:
-            # Invalid login
-            Log.objects.create(
-                user=None,
-                action=f"Failed login attempt for username: {request.POST.get('username')}",
-                ip_address=request.META.get('REMOTE_ADDR'),
-                status='fail'
+            messages.error(request, "Invalid username and/or password.")
+
+    return render(request, "accounts/login.html", {"form": form})
+
+
+@require_http_methods(["GET", "POST"])
+def register_view(request):
+    """
+    Simple registration: username, email, password, confirm password.
+    Fields always render because the template uses plain <input>s.
+    """
+    if request.user.is_authenticated:
+        return redirect("accounts:dashboard")
+
+    # Values to refill the form after a failed POST
+    data = {
+        "username": (request.POST.get("username") or "").strip(),
+        "email": (request.POST.get("email") or "").strip(),
+    }
+    errors = {"username": [], "email": [], "password1": [], "password2": [], "non_field": []}
+
+    if request.method == "POST":
+        username = data["username"]
+        email = data["email"]
+        password1 = request.POST.get("password1") or ""
+        password2 = request.POST.get("password2") or ""
+
+        # --- validations ---
+        if not username:
+            errors["username"].append("Username is required.")
+        elif User.objects.filter(username=username).exists():
+            errors["username"].append("This username is already taken.")
+
+        if not email:
+            errors["email"].append("Email is required.")
+        else:
+            try:
+                validate_email(email)
+            except ValidationError:
+                errors["email"].append("Enter a valid email address.")
+            else:
+                # Only check uniqueness if User model has 'email' field
+                if hasattr(User, "email") and User.objects.filter(email=email).exists():
+                    errors["email"].append("This email is already in use.")
+
+        if not password1:
+            errors["password1"].append("Password is required.")
+        elif len(password1) < 8:
+            errors["password1"].append("Password must be at least 8 characters.")
+
+        if not password2:
+            errors["password2"].append("Please confirm your password.")
+        elif password1 and password1 != password2:
+            errors["password2"].append("Passwords do not match.")
+
+        # If no errors, create the user
+        has_errors = any(errors[k] for k in errors if k != "non_field")
+        if not has_errors:
+            user = User.objects.create_user(
+                username=username,
+                email=email if hasattr(User, "email") else None,
+                password=password1,
             )
-            messages.error(request, "❌ Invalid username or password.")
-    else:
-        form = LoginForm()
+            # If your custom user has a 'role', choose a default (optional)
+            if hasattr(user, "role") and not getattr(user, "role", None):
+                user.role = "customer"
+                user.save()
 
-    return render(request, 'accounts/login.html', {'form': form})
+            messages.success(request, "Account created! Please log in.")
+            return redirect("accounts:login")
+
+        messages.error(request, "Please fix the errors below.")
+
+    return render(request, "accounts/register.html", {"data": data, "errors": errors})
 
 
-# Dashboard
 @login_required
 def dashboard_view(request):
-    Log.objects.create(
-        user=request.user,
-        action="Viewed dashboard",
-        ip_address=request.META.get('REMOTE_ADDR'),
-        status='success'
-    )
+    """
+    Route users to a role-based dashboard template if you have them.
+    Fallback to a generic dashboard if role isn’t present.
+    """
+    role = getattr(request.user, "role", None)
 
-    if request.user.role == 'admin':
-        return render(request, 'dashboard_admin.html')
-    elif request.user.role == 'manager':
-        return render(request, 'dashboard_manager.html')
+    if role == "admin":
+        tpl = "dashboard_admin.html"
+    elif role == "manager":
+        tpl = "dashboard_manager.html"
     else:
-        return render(request, 'dashboard_customer.html')
+        # customer / unknown
+        tpl = "dashboard_customer.html" if role == "customer" else "dashboard.html"
+
+    return render(request, tpl)
 
 
-# Logout
+@login_required
+def manage_users_view(request):
+    """
+    Only admins can access.
+    """
+    if getattr(request.user, "role", None) != "admin":
+        messages.error(request, "Not authorized!")
+        return redirect("accounts:dashboard")
+
+    users = User.objects.all().order_by("username")
+    return render(request, "accounts/manage_users.html", {"users": users})
+
+
 @login_required
 def logout_view(request):
-    Log.objects.create(
-        user=request.user,
-        action="User logged out",
-        ip_address=request.META.get('REMOTE_ADDR'),
-        status='success'
-    )
     logout(request)
-    return redirect('login')
-
-
-# Manage Users (Admin only)
-@login_required
-@user_passes_test(lambda u: u.role == 'admin')
-def manage_users_view(request):
-    users = User.objects.exclude(id=request.user.id)  # Exclude admin itself
-
-    if request.method == 'POST':
-        user_id = request.POST.get('user_id')
-        new_role = request.POST.get('role')
-        user = get_object_or_404(User, id=user_id)
-
-        old_role = user.role
-        user.role = new_role
-        user.save()
-
-        Log.objects.create(
-            user=request.user,
-            action=f"Changed {user.username}'s role from {old_role} to {new_role}",
-            ip_address=request.META.get('REMOTE_ADDR'),
-            status='success'
-        )
-        messages.success(request, f"{user.username}'s role updated to {new_role}.")
-
-    return render(request, 'accounts/manage_users.html', {'users': users})
+    messages.info(request, "You have been logged out.")
+    return redirect("accounts:login")

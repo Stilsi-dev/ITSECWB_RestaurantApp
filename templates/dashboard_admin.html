@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 {% endblock %}
@@ -12,12 +13,22 @@
     </div>
 
     <div class="dashboard-links">
-        <a href="{% url 'menu_list' %}" class="btn-dashboard">📖 Manage Menu Items</a>
-        <a href="{% url 'order_list' %}" class="btn-dashboard">📜 View All Orders</a>
-        <a href="{% url 'manage_users' %}" class="btn-primary">⚙ Manage Users</a>
-        <a href="{% url 'admin_logs' %}" class="btn-dashboard">📑 View System Logs</a>
+        {# If menu app is namespaced with app_name="menu" #}
+        <a href="{% url 'menu:menu_list' %}" class="btn-dashboard">📖 Manage Menu Items</a>
+
+        {# Orders is namespaced (you confirmed orders:list exists) #}
+        <a href="{% url 'orders:list' %}" class="btn-dashboard">📜 View All Orders</a>
+
+        {# Accounts is namespaced #}
+        <a href="{% url 'accounts:manage_users' %}" class="btn-primary">⚙ Manage Users</a>
+
+        {# If logs app is namespaced with app_name="logs", prefer logs:admin_logs #}
+        <a href="{% url 'logs:admin_logs' %}" class="btn-dashboard">📑 View System Logs</a>
+
         <a href="/admin/" class="btn-dashboard">⚙️ Django Admin (Advanced)</a>
-        <a href="{% url 'logout' %}" class="btn-dashboard logout">🚪 Logout</a>
+
+        {# Use the accounts logout you wired #}
+        <a href="{% url 'accounts:logout' %}" class="btn-dashboard logout">🚪 Logout</a>
     </div>
 </div>
 {% endblock %}

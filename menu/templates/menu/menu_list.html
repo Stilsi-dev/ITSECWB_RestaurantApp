@@ -9,7 +9,7 @@
 <div class="table-container">
     <div class="header-row">
         <h2>📖 Menu Items</h2>
-        <a href="{% url 'menu_create' %}" class="btn-link">+ Add New Item</a>
+        <a href="{% url 'menu:menu_create' %}" class="btn-link">+ Add New Item</a>
     </div>
 
     <table>
@@ -73,10 +73,12 @@
 
                 <!-- Actions -->
                 <td class="actions-cell">
-                    <a href="{% url 'menu_edit' item.id %}" class="btn-small primary">Edit</a>
-                    <form action="{% url 'menu_delete' item.id %}" method="post" style="display:inline-block;">
+                    <a href="{% url 'menu:menu_update' item.id %}" class="btn-small primary">Edit</a>
+                    <form action="{% url 'menu:menu_delete' item.id %}" method="post" style="display:inline-block;">
                         {% csrf_token %}
-                        <button type="submit" class="btn-small danger" onclick="return confirm('Delete this item?')">Delete</button>
+                        <button type="submit" class="btn-small danger" onclick="return confirm('Delete this item?')">
+                            Delete
+                        </button>
                     </form>
                 </td>
             </tr>

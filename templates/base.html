@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>{% block title %}Restaurant System{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/global.css' %}">
     {% block extra_css %}{% endblock %}
@@ -11,12 +11,19 @@
     <!-- NAVBAR -->
     <div class="navbar">
         <div class="nav-left">
-            <span>🍽️ Restaurant System</span>
+            <a href="{% url 'accounts:login' %}" class="brand">🍽️ Restaurant System</a>
         </div>
+
         <div class="nav-right">
-            <span>Hi, <strong>{{ user.username }}</strong></span>
-            <a href="{% url 'dashboard' %}" class="dashboard-link">🏠 Dashboard</a>
-            <a href="{% url 'logout' %}" class="logout-link">🔒 Logout</a>
+            {% if request.user.is_authenticated %}
+                <span>Hi, <strong>{{ request.user.username }}</strong></span>
+                <a href="{% url 'accounts:dashboard' %}" class="dashboard-link">🏠 Dashboard</a>
+                <a href="{% url 'accounts:logout' %}" class="logout-link">🔒 Logout</a>
+            {% else %}
+                <span>Hi, Guest</span>
+                <a href="{% url 'accounts:login' %}" class="dashboard-link">🔐 Login</a>
+                <a href="{% url 'accounts:register' %}" class="logout-link">📝 Register</a>
+            {% endif %}
         </div>
     </div>
 

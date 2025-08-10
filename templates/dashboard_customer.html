@@ -12,9 +12,9 @@
     </div>
 
     <div class="dashboard-links horizontal">
-        <a href="{% url 'order_list' %}" class="btn-dashboard">📋 My Orders</a>
-        <a href="{% url 'order_create' %}" class="btn-dashboard">🛒 Place a New Order</a>
-        <a href="{% url 'logout' %}" class="btn-dashboard logout">🚪 Logout</a>
+        <a href="{% url 'orders:list' %}" class="btn-dashboard">📋 My Orders</a>
+        <a href="{% url 'orders:create' %}" class="btn-dashboard">🛒 Place a New Order</a>
+        <a href="{% url 'accounts:logout' %}" class="btn-dashboard logout">🚪 Logout</a>
     </div>
 </div>
 {% endblock %}

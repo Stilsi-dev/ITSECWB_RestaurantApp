@@ -12,7 +12,7 @@ User = get_user_model()
 def admin_logs_view(request):
     if request.user.role != 'admin':
         messages.error(request, "Not authorized!")
-        return redirect('dashboard')
+        return redirect('accounts:dashboard')
 
     logs = Log.objects.all().order_by('-timestamp')
 
