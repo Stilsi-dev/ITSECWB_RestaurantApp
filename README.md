@@ -1,6 +1,25 @@
 # ITSECWB_CS — Restaurant Web App (ITSECWB Project)
 
-A secure **Restaurant Management System** built with **Django** implementing **Role-Based Access Control (RBAC)**, **audit logging**, **session security**, **account lockout**, **re-authentication for critical actions**, and strict **input validation** — compliant with the ITSECWB Machine Project Specifications and Secure Web Development Checklist.
+A secure **Restaurant Management System** built with **Django**, implementing **Role-Based Access Control (RBAC)**, **audit logging**, **session security**, **account lockout**, **last login/attempt reporting**, **re-authentication for critical actions**, and strict **input validation** — designed to comply with the ITSECWB Machine Project Specifications and Secure Web Development Checklist.
+
+---
+
+## **Sample Test Accounts**
+
+> ⚠️ **Security Notice:** These accounts are for **testing/demo purposes only**.  
+> Do **NOT** use them in production — change or remove them before deployment.
+
+**1️⃣ Manager Account**  
+- **Username:** `manager1`  
+- **Password:** `M@nager!2024`
+
+**2️⃣ Customer Account**  
+- **Username:** `customer1`  
+- **Password:** `Cust0mer!2024`
+
+**3️⃣ Administrator Account**  
+- **Username:** `admin`  
+- **Password:** `admin1234!`
 
 ---
 
@@ -8,7 +27,7 @@ A secure **Restaurant Management System** built with **Django** implementing **R
 
 ### **Administrator**
 - Manage all user accounts & roles (Admin, Manager, Customer)
-- Create/assign elevated accounts
+- Create and assign elevated accounts
 - View and filter system audit logs (read-only)
 - Full system access
 
@@ -19,7 +38,7 @@ A secure **Restaurant Management System** built with **Django** implementing **R
 
 ### **Customer**
 - Self-register and log in
-- Place, view, and cancel own orders (while pending)
+- Place, view, and cancel their own orders (while pending)
 - View available menu items
 
 ---
@@ -61,7 +80,7 @@ A secure **Restaurant Management System** built with **Django** implementing **R
     python manage.py runserver
     ```
 
-7. **Access the app**
+7. **Access the application**
     - **Web:** `http://127.0.0.1:8000`
     - **Django Admin:** `http://127.0.0.1:8000/admin`
 
@@ -85,7 +104,7 @@ A secure **Restaurant Management System** built with **Django** implementing **R
 - `/menu/<id>/delete/` — delete
 
 ### Orders
-- `/orders/` — list (managers/admins see all; customers see own)
+- `/orders/` — list (managers/admins see all; customers see only their own)
 - `/orders/create/`
 - `/orders/<id>/edit/`
 - `/orders/<id>/delete/`
@@ -99,19 +118,22 @@ A secure **Restaurant Management System** built with **Django** implementing **R
 ## **Security Features**
 
 ### Authentication
-- All non-public routes require login
-- Generic login failure messages
-- **Account lockout** after 5 failed attempts (15 min cooldown)
-- Passwords stored using salted cryptographic hashes
+- All non-public routes require login  
+- Generic login failure messages (no credential enumeration)  
+- **Account lockout** after 5 failed attempts (15 min cooldown)  
+- **Last login & last failed attempt reporting** on successful login  
+- Passwords stored using salted cryptographic hashes  
 - **Password policy:**
-  - Min length (12 chars policy, 8 chars form enforcement — align as needed)
-  - Must contain uppercase, lowercase, number, special char
-  - Block common/numeric passwords
+  - Minimum length: **8 characters**
+  - Must contain at least one uppercase letter, one lowercase letter, one number, and one special character
+  - Block common/numeric passwords  
 - **Password history & age:**
-  - Cannot reuse last 5 passwords
-  - Must be at least 1 day old before change
-- Re-authentication required for critical operations
-- Secure password reset with hashed security question answers and no user enumeration
+  - Cannot reuse last **5 passwords**
+  - Must be at least **1 day** old before change  
+- **Re-authentication** required for critical operations  
+- **Secure password reset** with:
+  - Hashed security question answers
+  - No user enumeration
 
 ### Authorization & Access Control
 - Centralized role checks
@@ -119,7 +141,7 @@ A secure **Restaurant Management System** built with **Django** implementing **R
 - Business logic enforced (customers can only manage their own orders and only while pending)
 
 ### Input Validation
-- Strict form validation (length, range)
+- Strict form validation (length, range, type)
 - Database-level `CheckConstraint`s
 - All invalid inputs rejected and logged
 
@@ -127,50 +149,64 @@ A secure **Restaurant Management System** built with **Django** implementing **R
 - Custom error templates (`400.html`, `403.html`, `404.html`, `500.html`, `csrf.html`)
 - No debug or stack traces shown to users in production
 
-### Logging
-- All key security events logged (auth attempts, access control failures, validation errors, CRUD actions)
-- Logs stored in DB and file (`logs/project.log`)
+### Logging & Auditing
+- Logs both **successes and failures**
+- Captures:
+  - Action description
+  - User (if authenticated)
+  - Timestamp
+  - IP address
+  - User-Agent
 - Admin-only log viewing with filters and pagination
 
 ### Session Security
-- Idle timeout: 30 minutes
+- Idle timeout: **30 minutes**
 - Session expires on browser close
-- Security headers: `SECURE_CONTENT_TYPE_NOSNIFF`, `SECURE_REFERRER_POLICY=same-origin`, `X_FRAME_OPTIONS=DENY`
+- Secure headers:
+  - `SECURE_CONTENT_TYPE_NOSNIFF`
+  - `SECURE_REFERRER_POLICY = "same-origin"`
+  - `X_FRAME_OPTIONS = "DENY"`
 
 ---
 
 ## **Compliance Mapping (Checklist → Implementation)**
 
-| Checklist Item | Implemented In |
-|----------------|----------------|
-| Require auth for non-public pages | `@login_required` on views |
-| Fail-secure auth & access | `_deny()`, `_fail_secure_forbidden()`, 403/404 handling |
-| Salted password hashes | Django’s default hashers |
-| Generic login failure | `accounts/views.py:login_view` |
-| Password complexity & length | `accounts/validators.py` + settings |
-| Account lockout | `accounts/auth_backends.py` + `signals.py` |
-| Password re-use blocked | `PasswordHistory` + validators |
-| Min password age | Validators & settings |
-| Re-auth before critical ops | `/reauth/` + decorator |
-| Access control checks | Centralized role checks in views |
-| Enforce business rules | Order/customer ownership checks |
-| Data validation | Forms + model constraints |
-| No debug in errors | Custom error templates |
-| Logging successes & failures | `logs/utils.py:audit_log` |
-| Restrict log access | `/logs/` admin-only |
+| Checklist Item | Status | Implemented In |
+|----------------|--------|----------------|
+| Require auth for non-public pages | ✅ | `@login_required` decorators |
+| Fail-secure auth & access | ✅ | `_fail_secure_forbidden()` + error views |
+| Salted password hashes | ✅ | Django’s default hashers |
+| Generic login failure | ✅ | `login_view` |
+| Password complexity & length (8 chars min) | ✅ | `accounts/validators.py` + settings |
+| Account lockout | ✅ | `accounts/auth_backends.py` + `signals.py` |
+| Password re-use blocked | ✅ | `PasswordHistory` + validators |
+| Min password age | ✅ | Validators & settings |
+| Re-auth before critical ops | ✅ | `/reauth/` + `require_recent_reauth` decorator |
+| Last use reporting | ✅ | `accounts/signals.py` & login message |
+| Access control checks | ✅ | Role checks in views |
+| Enforce business rules | ✅ | Orders/Menu CRUD restrictions |
+| Data validation | ✅ | Forms + model constraints |
+| Password fields masked | ✅ | `<input type="password">` in templates |
+| Security question randomness & hashing | ✅ | `setup_security_question_view` + `_hash_answer` |
+| No debug in errors | ✅ | Custom error templates |
+| Logging successes & failures | ✅ | `logs/utils.py:audit_log` |
+| Restrict log access | ✅ | `/logs/` admin-only role check |
 
 ---
 
 ## **Production Recommendations**
-Before deploying:
+Before deployment:
 - Set `DEBUG = False`
-- Replace `SECRET_KEY` with a strong value from environment variables
+- Use a strong `SECRET_KEY` from environment variables
 - Set `ALLOWED_HOSTS`
-- Create `logs/` dir with correct permissions
-- Consider enabling:
+- Ensure `logs/` directory exists with proper permissions
+- Enable:
   - `SECURE_SSL_REDIRECT = True`
   - `CSRF_COOKIE_SECURE = True`
   - `SESSION_COOKIE_SECURE = True`
-  - `SECURE_HSTS_SECONDS` and related settings
+  - `SECURE_HSTS_SECONDS` and related headers
 
 ---
+
+## **License**
+MIT License – Free to use, modify, and distribute with attribution.
