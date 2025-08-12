@@ -17771,3 +17771,5 @@ Watching for file changes with StatReloader
 "GET /manage-users/ HTTP/1.1" 200 7063
 "POST /manage-users/ HTTP/1.1" 302 0
 "GET /manage-users/ HTTP/1.1" 200 7065
+D:\FILES\DLSU\CAPSTONE\ITSECWB_CS\restaurant_project\settings.py changed, reloading.
+Watching for file changes with StatReloader

@@ -99,7 +99,7 @@ REAUTH_TIMEOUT_MINUTES = 5          # 2.1.13 window
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-     "OPTIONS": {"min_length": 12}},   # <-- set policy length here (use 8 if needed now)
+     "OPTIONS": {"min_length": 8}},   # <-- set policy length here (use 8 if needed now)
     {"NAME": "accounts.validators.StrongPasswordValidator"},     # upper/lower/number/special
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
