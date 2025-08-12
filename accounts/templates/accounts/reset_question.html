@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/accounts.css' %}">{% endblock %}
+
+{% block content %}
+<div class="form-container">
+  <h2 class="form-title">🔒 Verify Identity</h2>
+  <p class="muted">Security question:</p>
+  <p><strong>{{ question }}</strong></p>
+  <form method="post">{% csrf_token %}
+    <div class="form-group">
+      <label>Your Answer</label>
+      <input name="answer" type="text" required>
+    </div>
+    <button class="btn-primary">Verify</button>
+  </form>
+</div>
+{% endblock %}

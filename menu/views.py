@@ -1,67 +1,105 @@
 # menu/views.py
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_POST
+import logging
 
-from .models import MenuItem
 from .forms import MenuItemForm
+from .models import MenuItem
+from logs.utils import audit_log  # <- centralized audit helper
 
-def _require_admin(request):
-    # Adjust this if you use permissions instead of a role field
-    if not request.user.is_authenticated:
-        return redirect("accounts:login")
-    if getattr(request.user, "role", None) != "admin":
-        messages.error(request, "Not authorized.")
-        return redirect("accounts:dashboard")
-    return None
+log = logging.getLogger("django")
+
+
+def _is_manager(user):
+    return getattr(user, "role", None) in {"manager", "admin"} or user.is_superuser
+
+
+def _deny(request, action: str):
+    """
+    Fail securely:
+    - Return generic 403 without leaking details
+    - Log access control failure to both Django logs and audit trail
+    """
+    user = request.user if getattr(request, "user", None) and request.user.is_authenticated else None
+    audit_log(request, user, action, "fail")
+    log.warning("Access control failure: user=%s path=%s action=%s", user, request.path, action)
+    return HttpResponseForbidden("You are not allowed to perform this action.")
+
 
 @login_required
 def menu_list_view(request):
-    guard = _require_admin(request)
-    if guard: return guard
+    if not _is_manager(request.user):
+        return _deny(request, "View menu list (manager-only)")
+
     items = MenuItem.objects.all().order_by("name")
-    return render(request, "menu/menu_list.html", {"menu_items": items})
+    audit_log(request, request.user, "Viewed menu list", "success")
+    return render(request, "menu/menu_list.html", {"items": items})
+
 
 @login_required
 def menu_create_view(request):
-    guard = _require_admin(request)
-    if guard: return guard
+    if not _is_manager(request.user):
+        return _deny(request, "Create menu item (manager-only)")
+
     if request.method == "POST":
         form = MenuItemForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            item = form.save()
             messages.success(request, "Menu item created.")
-            return redirect("menu:menu_list")
+            audit_log(request, request.user, f"Created menu item #{item.pk} ({item.name})", "success")
+            return redirect("menu:list")
+
+        # Validation failure logging (2.4.5)
+        messages.error(request, "Please correct the errors below.")
+        audit_log(request, request.user, "Create menu item validation failed", "fail")
+        log.warning("Menu create validation errors: %s", dict(form.errors))
     else:
         form = MenuItemForm()
-    return render(request, "menu/menu_form.html", {"form": form, "title": "Create Menu Item"})
+
+    return render(request, "menu/menu_form.html", {"form": form, "title": "Add Menu Item"})
+
 
 @login_required
-def menu_update_view(request, pk: int):
-    guard = _require_admin(request)
-    if guard: return guard
+def menu_edit_view(request, pk):
+    if not _is_manager(request.user):
+        return _deny(request, "Edit menu item (manager-only)")
+
     item = get_object_or_404(MenuItem, pk=pk)
+
     if request.method == "POST":
         form = MenuItemForm(request.POST, request.FILES, instance=item)
         if form.is_valid():
-            form.save()
+            item = form.save()
             messages.success(request, "Menu item updated.")
-            return redirect("menu:menu_list")
+            audit_log(request, request.user, f"Updated menu item #{item.pk} ({item.name})", "success")
+            return redirect("menu:list")
+
+        # Validation failure logging (2.4.5)
+        messages.error(request, "Please correct the errors below.")
+        audit_log(request, request.user, f"Edit menu item #{pk} validation failed", "fail")
+        log.warning("Menu edit validation errors for #%s: %s", pk, dict(form.errors))
     else:
         form = MenuItemForm(instance=item)
+
     return render(request, "menu/menu_form.html", {"form": form, "title": f"Edit: {item.name}"})
 
-@login_required
-@require_POST
-def menu_delete_view(request, pk: int):
-    guard = _require_admin(request)
-    if guard: return guard
-    item = get_object_or_404(MenuItem, pk=pk)
-    item.delete()
-    messages.success(request, "Menu item deleted.")
-    return redirect("menu:menu_list")
 
-def menu_edit_view(request, pk):
-    # Reuse your existing update logic
-    return menu_update_view(request, pk)
+@login_required
+def menu_delete_view(request, pk):
+    if not _is_manager(request.user):
+        return _deny(request, "Delete menu item (manager-only)")
+
+    item = get_object_or_404(MenuItem, pk=pk)
+
+    if request.method == "POST":
+        name = item.name
+        item.delete()
+        messages.success(request, "Menu item deleted.")
+        audit_log(request, request.user, f"Deleted menu item #{pk} ({name})", "success")
+        return redirect("menu:list")
+
+    # GET: show confirm page – do not leak internals
+    audit_log(request, request.user, f"Viewed delete confirm for menu item #{pk}", "success")
+    return render(request, "menu/menu_confirm_delete.html", {"item": item})

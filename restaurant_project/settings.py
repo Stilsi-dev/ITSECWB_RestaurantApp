@@ -12,6 +12,13 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
+# Security headers (defensive; fail-closed where possible)
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = "same-origin"
+X_FRAME_OPTIONS = "DENY"
+
+CSRF_FAILURE_VIEW = "restaurant_project.error_views.error_403_csrf"
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -20,15 +27,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "django_extensions",
-
+    'django_extensions',
 
     # Custom apps
-    'accounts', 
+    'accounts',   # if you created AccountsConfig + signals, you can also use: 'accounts.apps.AccountsConfig'
     'menu',
     'orders',
     'logs',
-
 ]
 
 MIDDLEWARE = [
@@ -69,26 +74,46 @@ DATABASES = {
     }
 }
 
-# Password validation
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        'OPTIONS': {'min_length': 8},  # Enforces minimum password length
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-    {
-        'NAME': 'accounts.validators.StrongPasswordValidator',  # Custom validator
-    }
+SECURITY_QUESTIONS = [
+    "What was the name of the street you lived on as a child?",
+    "What is the middle name of your oldest sibling?",
+    "What is the name of the first company you worked for?",
+    "What is the name of the first school you attended?",
+    "What is your maternal grandmother’s maiden name?",
+    "What was the make and model of your first car?",
+    "What was the name of your childhood best friend?",
+    "In what city did your parents meet?",
+    "What is the title of your favorite book from childhood?",
+    "What is the name of the hospital where you were born?",
 ]
 
+# Password history & age
+PASSWORD_HISTORY_COUNT = 5          # 2.1.10
+MIN_PASSWORD_AGE_DAYS = 1           # 2.1.11
+
+# Re-authenticate before critical ops
+REAUTH_TIMEOUT_MINUTES = 5          # 2.1.13 window
+
+
+# ===== Password validation (2.1.5–2.1.6) =====
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+     "OPTIONS": {"min_length": 12}},   # <-- set policy length here (use 8 if needed now)
+    {"NAME": "accounts.validators.StrongPasswordValidator"},     # upper/lower/number/special
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+    {"NAME": "accounts.validators.PasswordHistoryValidator"},
+    {"NAME": "accounts.validators.MinimumPasswordAgeValidator"},
+]
+
+# ===== Account lockout (2.1.8) =====
+# Use custom backend that honors locked accounts (accounts/auth_backends.py)
+AUTHENTICATION_BACKENDS = ["accounts.auth_backends.LockoutBackend"]
+
+# Tunables for signals (accounts/signals.py)
+LOCKOUT_MAX_FAILURES = 5            # number of consecutive failures before lock
+LOCKOUT_COOLDOWN_MINUTES = 15       # lockout duration
 
 # Custom user model
 AUTH_USER_MODEL = 'accounts.User'
@@ -120,7 +145,7 @@ LOGOUT_REDIRECT_URL = '/login/'
 SESSION_COOKIE_AGE = 1800  # 30 minutes
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-# Logging (basic setup — customize as needed)
+# Logging (includes a 'security' logger for auth events)
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -137,9 +162,10 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
+        'security': {                      # used by accounts/signals.py
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
     },
 }
-
-# Media (for user-uploaded images)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'

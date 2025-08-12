@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
 {% block extra_css %}
@@ -7,131 +7,75 @@
 
 {% block content %}
 <div class="order-container">
-    <h2><i class="fas fa-shopping-cart"></i> Place New Order</h2>
+  <h2>🛒 {% if form.instance.pk %}Edit Order{% else %}Create Order{% endif %}</h2>
 
-    <form method="POST" id="order-form">
-        {% csrf_token %}
+  <form method="post" id="order-form" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
 
-        <!-- Table Number -->
-        <div class="form-group table-number">
-            <label for="table_number">Table Number:</label>
-            <input type="text" name="table_number" id="table_number" placeholder="Enter Table Number" required>
-        </div>
+    <!-- Only Table field (status removed) -->
+    <div class="table-number">
+      <label for="{{ form.table_number.id_for_label }}">Table</label><br>
+      {{ form.table_number }} {{ form.table_number.errors }}
+    </div>
 
-        <!-- Item Selection Grid -->
-        <div class="form-group">
-            <label class="section-title">Select Items:</label>
-            <div class="items-grid">
-                {% for item in menu_items %}
-                <div class="card {% if not item.is_available %}unavailable{% endif %}">
-                    <input type="checkbox" id="item-{{ item.id }}" name="items" value="{{ item.id }}" {% if not item.is_available %}disabled{% endif %}>
+    <!-- 2-column layout: items grid + sticky summary -->
+    <div class="order-layout">
+      <section>
+        <label class="section-title" style="font-weight:600;display:block;margin-bottom:8px;">Select Items:</label>
 
-                    <!-- Selected Badge -->
-                    <div class="selected-badge">✔ Selected</div>
+        <div class="items-grid" id="cards-grid">
+          {% for item in menu_items %}
+          <div class="card" data-id="{{ item.id }}" data-price="{{ item.price|floatformat:'2' }}">
+            <div class="selected-badge">✔ Selected</div>
+            <input type="checkbox" class="card-check" aria-label="select {{ item.name }}">
 
-                    <label for="item-{{ item.id }}">
-                        <img src="{{ item.image.url }}" alt="{{ item.name }}" class="menu-image">
-                        <h4 class="item-title">{{ item.name }}</h4>
-                        <p class="item-description">{{ item.description }}</p>
-                        <div class="price">₱{{ item.price }}</div>
-                    </label>
+            <img src="{{ item.image.url }}" class="menu-image" alt="{{ item.name }}">
+            <h4 class="item-title">{{ item.name }}</h4>
+            <p class="item-description">{{ item.description }}</p>
+            <div class="price">₱{{ item.price }}</div>
 
-                    <!-- Quantity Controls -->
-                    <div class="quantity-controls">
-                        <button type="button" class="qty-btn" data-action="minus" data-id="{{ item.id }}">-</button>
-                        <input type="number" name="quantity_{{ item.id }}" value="1" min="1" class="qty-input" disabled>
-                        <button type="button" class="qty-btn" data-action="plus" data-id="{{ item.id }}">+</button>
-                    </div>
-                </div>
-                {% endfor %}
+            <div class="quantity-controls" style="margin-top:8px;">
+              <button type="button" class="qty-btn" data-action="minus">−</button>
+              <input type="number" class="qty-input" value="1" min="1" disabled>
+              <button type="button" class="qty-btn" data-action="plus">+</button>
             </div>
+          </div>
+          {% endfor %}
         </div>
+      </section>
 
-        <!-- Order Summary -->
-        <div class="order-summary">
-            <h3><i class="fas fa-receipt"></i> Order Summary</h3>
-            <ul id="summary-list"></ul>
-            <div class="summary-total">
-                <span>Total:</span> <strong id="summary-total">₱0.00</strong>
-            </div>
+      <aside class="summary-box">
+        <h3>🧾 Order Summary</h3>
+        <div class="summary-line">
+          <span>Table</span>
+          <strong id="summary-table">—</strong>
         </div>
+        <ul id="summary-list" class="summary-list"></ul>
+        <div class="summary-total">
+          <span>Total</span>
+          <strong id="summary-total">₱0.00</strong>
+        </div>
+      </aside>
+    </div>
 
-        <!-- Buttons -->
-        <div class="button-row">
-            <button type="submit" class="btn-primary">Submit Order</button>
-            <a href="{% url 'orders:list' %}" class="btn-secondary">← Back</a>
-        </div>
-    </form>
+    <!-- Hidden inline formset (kept functional) -->
+    {{ formset.non_field_errors }}
+    {{ formset.management_form }}
+    <div id="hidden-formset" style="display:none;">
+      {% for f in formset.forms %}
+        {{ f.id }} {{ f.menu_item }} {{ f.quantity }} {{ f.notes }}
+        {% if f.fields.DELETE %}{{ f.DELETE }}{% endif %}
+      {% endfor %}
+    </div>
+
+    <div class="button-row">
+      <button type="submit" class="btn-primary">Submit Order</button>
+      <a href="{% url 'orders:list' %}" class="btn-secondary">← Back</a>
+    </div>
+  </form>
 </div>
 
-<!-- JavaScript -->
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const checkboxes = document.querySelectorAll(".card input[type='checkbox']");
-    const summaryList = document.getElementById("summary-list");
-    const summaryTotal = document.getElementById("summary-total");
-
-    function formatCurrency(value) {
-        return "₱" + value.toFixed(2);
-    }
-
-    function updateSummary() {
-        summaryList.innerHTML = "";
-        let total = 0;
-
-        checkboxes.forEach((checkbox) => {
-            if (checkbox.checked) {
-                const card = checkbox.closest(".card");
-                const name = card.querySelector(".item-title").innerText;
-                const price = parseFloat(card.querySelector(".price").innerText.replace("₱", ""));
-                const qtyInput = card.querySelector(".qty-input");
-                const qty = parseInt(qtyInput.value);
-
-                const li = document.createElement("li");
-                li.innerText = `${name} x ${qty} - ${formatCurrency(price * qty)}`;
-                summaryList.appendChild(li);
-
-                total += price * qty;
-            }
-        });
-
-        summaryTotal.innerText = formatCurrency(total);
-    }
-
-    // Toggle quantity and card selection styles
-    checkboxes.forEach((checkbox) => {
-        checkbox.addEventListener("change", function () {
-            const card = this.closest(".card");
-            const badge = card.querySelector(".selected-badge");
-            const qtyInput = card.querySelector(".qty-input");
-
-            qtyInput.disabled = !this.checked;
-            if (this.checked) {
-                card.classList.add("selected");
-                badge.style.display = "block";
-            } else {
-                card.classList.remove("selected");
-                badge.style.display = "none";
-            }
-            updateSummary();
-        });
-    });
-
-    // Handle quantity buttons
-    document.querySelectorAll(".qty-btn").forEach((btn) => {
-        btn.addEventListener("click", function () {
-            const id = this.dataset.id;
-            const action = this.dataset.action;
-            const qtyInput = document.querySelector(`input[name='quantity_${id}']`);
-            let qty = parseInt(qtyInput.value);
-
-            if (action === "minus" && qty > 1) qty--;
-            if (action === "plus") qty++;
-
-            qtyInput.value = qty;
-            updateSummary();
-        });
-    });
-});
-</script>
+<!-- External JS -->
+<script src="{% static 'js/order_form.js' %}"></script>
 {% endblock %}

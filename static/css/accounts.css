@@ -4,181 +4,157 @@
 
 /* Container */
 .form-container {
-    max-width: 350px;
-    margin: 70px auto;
-    background: #ffffff;
-    padding: 28px;
-    border-radius: 10px;
-    box-shadow: 0 6px 14px rgba(0,0,0,0.1);
-    text-align: center;
+  max-width: 350px;
+  margin: 70px auto;
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 10px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+  text-align: center;
 }
 
 /* Title */
 .form-title {
-    font-size: 22px;
-    font-weight: bold;
-    color: #2c3e50;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 22px;
+  font-size: 22px;
+  font-weight: bold;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 22px;
 }
 
 /* Form groups */
 .form-group {
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-    margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  margin-bottom: 15px;
 }
-
 .form-group label {
-    font-weight: bold;
-    font-size: 13px;
-    color: #34495e;
-    margin-bottom: 5px;
+  font-weight: bold;
+  font-size: 13px;
+  color: #34495e;
+  margin-bottom: 5px;
 }
-
-.form-group label .required {
-    color: #e74c3c;
-    font-weight: bold;
-    margin-left: 3px;
-}
+.form-group label .required { color: #e74c3c; font-weight: bold; margin-left: 3px; }
 
 /* Inputs */
 .form-group input[type="text"],
 .form-group input[type="password"],
 .form-group input[type="email"],
 .form-group select {
-    padding: 8px 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    font-size: 14px;
-    background: #f4f9ff;
-    transition: border 0.2s, background 0.2s;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  background: #f4f9ff;
+  transition: border 0.2s, background 0.2s;
 }
-
 .form-group input:focus,
 .form-group select:focus {
-    border: 1px solid #3498db;
-    outline: none;
-    background: #ffffff;
+  border: 1px solid #3498db;
+  outline: none;
+  background: #ffffff;
 }
 
-/* Error message list (below inputs) */
+/* ----- Error styles (used by our templates) ----- */
+
+/* For Django <ul class="errorlist"> */
 ul.errorlist {
-    margin: 3px 0 0 0;
-    padding: 0;
-    list-style: none;
-    color: #e74c3c;
-    font-size: 12px;
-    text-align: left;
+  margin: 3px 0 0 0;
+  padding: 0;
+  list-style: none;
+  color: #e74c3c;
+  font-size: 12px;
+  text-align: left;
 }
 
-/* Non-field error container (top errors) */
-.form-error {
-    background: #fdecea;
-    border: 1px solid #e74c3c;
-    padding: 8px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    color: #e74c3c;
-    font-size: 13px;
-    text-align: center;
+/* Top non-field error box */
+.form-error,
+.form-errors { /* keep both selectors supported */
+  background: #fdecea;
+  border: 1px solid #e74c3c;
+  padding: 8px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  color: #e74c3c;
+  font-size: 13px;
+  text-align: center;
 }
+
+/* Inline field errors we render under inputs */
+.field-error {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+/* Password rules helper */
+.helptext {
+  display: block;
+  font-size: 12.5px;
+  color: #555;
+  background: #f4f9ff;
+  border-left: 3px solid #3498db;
+  padding: 8px 10px;
+  margin-top: 6px;
+  border-radius: 4px;
+}
+.helptext ul { margin: 6px 0 0 16px; list-style: disc; }
 
 /* Buttons */
 .btn-primary {
-    background: #3498db;
-    color: white;
-    font-weight: bold;
-    padding: 9px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    width: 100%;
-    font-size: 15px;
-    transition: background 0.3s;
+  background: #3498db;
+  color: white;
+  font-weight: bold;
+  padding: 9px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  font-size: 15px;
+  transition: background 0.3s;
 }
-
-.btn-primary:hover {
-    background: #2980b9;
-}
+.btn-primary:hover { background: #2980b9; }
 
 /* Register/Login link text */
-.link-text {
-    margin-top: 12px;
-    font-size: 13px;
-    color: #555;
-}
-
-.link-text a {
-    color: #3498db;
-    font-weight: bold;
-    text-decoration: none;
-}
-
-.link-text a:hover {
-    text-decoration: underline;
-}
+.link-text { margin-top: 12px; font-size: 13px; color: #555; }
+.link-text a { color: #3498db; font-weight: bold; text-decoration: none; }
+.link-text a:hover { text-decoration: underline; }
 
 /* ===========================
    MANAGE USERS TABLE
    =========================== */
 
 .table-container {
-    max-width: 900px;
-    margin: 40px auto;
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+  max-width: 900px;
+  margin: 40px auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.1);
 }
-
 .logs-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
 }
-
 .logs-table th, .logs-table td {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    text-align: center;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
 }
-
 .logs-table th {
-    background: #f4f4f4;
-    font-weight: bold;
-    color: #2c3e50;
+  background: #f4f4f4;
+  font-weight: bold;
+  color: #2c3e50;
 }
-
-.logs-table tr:nth-child(even) {
-    background: #f9f9f9;
-}
-
-.empty {
-    text-align: center;
-    font-style: italic;
-    color: #888;
-}
+.logs-table tr:nth-child(even) { background: #f9f9f9; }
+.empty { text-align: center; font-style: italic; color: #888; }
 
 /* Alerts */
-.alert {
-    padding: 8px;
-    margin: 10px 0;
-    border-radius: 5px;
-    font-size: 14px;
-    text-align: center;
-}
-
-.alert.success {
-    background: #d4edda;
-    color: #155724;
-}
-
-.alert.error {
-    background: #f8d7da;
-    color: #721c24;
-}
+.alert { padding: 8px; margin: 10px 0; border-radius: 5px; font-size: 14px; text-align: center; }
+.alert.success { background: #d4edda; color: #155724; }
+.alert.error { background: #f8d7da; color: #721c24; }

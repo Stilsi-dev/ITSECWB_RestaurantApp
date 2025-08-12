@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Bad Request{% endblock %}
+{% block content %}
+<div class="form-container">
+  <h2>Something went wrong (400)</h2>
+  <p class="muted">Your request couldn't be processed.</p>
+  <p><a class="btn-secondary" href="{% url 'accounts:dashboard' %}">Back to Dashboard</a></p>
+</div>
+{% endblock %}

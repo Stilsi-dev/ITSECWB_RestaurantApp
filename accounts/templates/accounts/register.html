@@ -35,6 +35,9 @@
         <div class="form-group">
             <label for="id_password1">Password <span style="color:red">*</span></label>
             <input type="password" id="id_password1" name="password1" required>
+            {% if password_help_html %}
+            <div class="helptext">{{ password_help_html|safe }}</div>
+            {% endif %}
             {% for e in errors.password1 %}<div class="field-error">{{ e }}</div>{% endfor %}
         </div>
 

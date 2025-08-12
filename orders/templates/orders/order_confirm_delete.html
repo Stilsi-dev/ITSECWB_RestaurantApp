@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Delete Order #{{ order.id }}</h2>
+<p>This cannot be undone. Continue?</p>
+<form method="post">
+  {% csrf_token %}
+  <button type="submit" class="btn-danger">Delete</button>
+  <a href="{% url 'orders:list' %}">Cancel</a>
+</form>
+{% endblock %}

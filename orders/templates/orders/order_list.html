@@ -1,100 +1,148 @@
 {% extends "base.html" %}
 {% load static %}
+
+{% block title %}Orders · Restaurant System{% endblock %}
+
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/orders.css' %}">
 {% endblock %}
 
 {% block content %}
-<div class="table-container">
-    <div class="header-row">
-        <h2>📦 Orders</h2>
-        {% if user.role == 'customer' %}
-            <a href="{% url 'orders:create' %}" class="btn-primary">+ Place New Order</a>
-        {% endif %}
+<div class="order-container">
+  <!-- Header row: Left = Place New Order, Right = Search + timestamp -->
+  <div class="table-header">
+    <h2>🧾 Orders</h2>
+    <div class="header-right">
+      <div class="header-right-top">
+        <a class="btn-primary btn-icon" href="{% url 'orders:create' %}">
+          <span>➕</span><span>Place New Order</span>
+        </a>
+        <input id="order-search" class="search-input" type="search"
+               placeholder="Search by ID, table, customer, or item…">
+      </div>
+      <div class="timestamp muted">
+        Updated {% now "Y-m-d H:i" %}
+      </div>
     </div>
+  </div>
 
-    {% if orders %}
-    <div class="orders-list">
-        {% for order in orders %}
-        <div class="order-card">
-            <div class="order-header">
-                <div class="order-id">#{{ order.id }}</div>
-                <div class="order-status 
-                    {% if order.status == 'pending' %}pending
-                    {% elif order.status == 'preparing' %}preparing
-                    {% elif order.status == 'completed' %}completed
-                    {% elif order.status == 'cancelled' %}cancelled{% endif %}">
-                    {{ order.status|title }}
-                </div>
-            </div>
-            
-            <div class="order-meta">
-                <div class="customer-info">
-                    <span class="customer-avatar">{{ order.customer.username|first|upper }}</span>
-                    <span class="customer-name">{{ order.customer.username }}</span>
-                </div>
-                <span class="order-date">{{ order.created_at|date:"M d, Y, g:i a" }}</span>
-            </div>
+  {% if orders %}
+  <div class="table-wrap">
+    <table class="data-table" id="orders-table">
+      <thead>
+        <tr>
+          <th style="width: 90px;">ID</th>
+          <th style="width: 120px;">Table</th>
+          <th style="width: 220px;">Customer</th>
+          <th>Items</th>
+          <th style="width: 130px;">Status</th>
+          <th class="hide-sm" style="width: 180px;">Created</th>
+          <th style="width: 290px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for order in orders %}
+        <tr
+          data-search="{{ order.id }} {{ order.table_number|default_if_none:'' }} {{ order.customer.username }} {% for line in order.order_items.all %} {{ line.menu_item.name }} {% endfor %}">
+          <td class="mono">#{{ order.id }}</td>
 
-            <div class="order-items">
-                {% for item in order.items.all %}
-                    <div class="order-item-card">
-                        {% if item.image %}
-                            <img src="{{ item.image.url }}" alt="{{ item.name }}">
-                        {% else %}
-                            <div class="no-img">No Img</div>
-                        {% endif %}
-                        <div class="order-item-info">
-                            <span class="item-name">{{ item.name }}</span>
-                            <span class="item-description">{{ item.description|truncatechars:50 }}</span>
-                        </div>
-                    </div>
+          <td>
+            {% if order.table_number %}
+              <span class="badge">{{ order.table_number }}</span>
+            {% else %}
+              <span class="muted">—</span>
+            {% endif %}
+          </td>
+
+          <td class="customer-cell nowrap">
+            <span class="avatar">{{ order.customer.username|first|upper }}</span>
+            <span class="customer-name">{{ order.customer.username }}</span>
+          </td>
+
+          <td>
+            {% if order.order_items.all %}
+              <div class="chips">
+                {% for line in order.order_items.all %}
+                  <span class="chip" title="{{ line.menu_item.name }}">
+                    {{ line.menu_item.name }} × {{ line.quantity }}
+                  </span>
                 {% empty %}
-                    <span class="text-muted">No items</span>
+                  <em class="muted">No items</em>
                 {% endfor %}
-            </div>
+              </div>
+            {% else %}
+              <em class="muted">No items</em>
+            {% endif %}
+          </td>
 
-            <div class="order-actions">
-                {% if user.role == 'customer' %}
-                    {% if order.status == 'pending' %}
-                        <form action="{% url 'order_cancel' order.id %}" method="post"
-                              onsubmit="return confirm('Cancel this order?');">
-                            {% csrf_token %}
-                            <button type="submit" class="btn-small danger">Cancel</button>
-                        </form>
-                    {% else %}
-                        <span class="text-muted">No actions available</span>
-                    {% endif %}
+          <td class="nowrap">
+            {% with s=order.status %}
+              <span class="status-badge
+                {% if s == 'pending' %} pending
+                {% elif s == 'preparing' %} preparing
+                {% elif s == 'completed' %} completed
+                {% elif s == 'cancelled' %} cancelled
+                {% endif %}">
+                {{ order.get_status_display }}
+              </span>
+            {% endwith %}
+          </td>
+
+          <td class="nowrap hide-sm">{{ order.created_at|date:"Y-m-d H:i" }}</td>
+
+          <td class="nowrap">
+            <div class="row-actions">
+              {# Managers/Admins: status transitions #}
+              {% if request.user.is_superuser or request.user.role in 'manager admin' %}
+                {% if order.status == 'pending' %}
+                  <form method="post" action="{% url 'orders:status' order.id 'preparing' %}">
+                    {% csrf_token %}
+                    <button class="btn-mini">Mark Preparing</button>
+                  </form>
+                  <form method="post" action="{% url 'orders:status' order.id 'cancelled' %}">
+                    {% csrf_token %}
+                    <button class="btn-mini danger">Cancel</button>
+                  </form>
+                {% elif order.status == 'preparing' %}
+                  <form method="post" action="{% url 'orders:status' order.id 'completed' %}">
+                    {% csrf_token %}
+                    <button class="btn-mini success">Mark Completed</button>
+                  </form>
+                  <form method="post" action="{% url 'orders:status' order.id 'cancelled' %}">
+                    {% csrf_token %}
+                    <button class="btn-mini danger">Cancel</button>
+                  </form>
                 {% else %}
-                    {% if order.status == 'pending' %}
-                        <form action="{% url 'order_prepare' order.id %}" method="post"
-                              onsubmit="return confirm('Mark as preparing?');">
-                            {% csrf_token %}
-                            <button type="submit" class="btn-small primary">Prepare</button>
-                        </form>
-                        <form action="{% url 'order_cancel' order.id %}" method="post"
-                              onsubmit="return confirm('Cancel this order?');">
-                            {% csrf_token %}
-                            <button type="submit" class="btn-small danger">Cancel</button>
-                        </form>
-                    {% elif order.status == 'preparing' %}
-                        <form action="{% url 'order_complete' order.id %}" method="post"
-                              onsubmit="return confirm('Mark as completed?');">
-                            {% csrf_token %}
-                            <button type="submit" class="btn-small success">Complete</button>
-                        </form>
-                    {% else %}
-                        <span class="text-muted">No actions</span>
-                    {% endif %}
+                  <span class="muted">—</span>
                 {% endif %}
+
+              {# Customers: only while pending and owner #}
+              {% else %}
+                {% if order.status == 'pending' and order.customer_id == request.user.id %}
+                  <a class="btn-mini" href="{% url 'orders:update' order.id %}">Edit</a>
+                  <form method="post"
+                        action="{% url 'orders:delete' order.id %}"
+                        onsubmit="return confirm('Cancel order #{{ order.id }}?')">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-mini danger">Cancel</button>
+                  </form>
+                {% else %}
+                  <span class="muted">—</span>
+                {% endif %}
+              {% endif %}
             </div>
-        </div>
-        {% endfor %}
-    </div>
-    {% else %}
-        <div class="empty-state">
-            <p>No orders found.</p>
-        </div>
-    {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p class="muted">No orders yet.</p>
+  {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/order_list.js' %}"></script>
 {% endblock %}

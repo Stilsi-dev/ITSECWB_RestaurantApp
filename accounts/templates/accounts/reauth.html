@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/accounts.css' %}">{% endblock %}
+
+{% block content %}
+<div class="form-container">
+  <h2 class="form-title">✅ Re-authenticate</h2>
+  <form method="post">{% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <div class="form-group">
+      <label>Password</label>
+      <input name="password" type="password" required>
+    </div>
+    <button class="btn-primary">Confirm</button>
+  </form>
+</div>
+{% endblock %}

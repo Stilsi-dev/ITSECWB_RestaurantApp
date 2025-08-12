@@ -1,98 +1,160 @@
 /* ===========================
-   LOGS PAGE STYLES (Unified with Orders/Menu)
+   LOGS PAGE (refined)
    =========================== */
 
-/* Table container */
+/* Container */
 .table-container {
-    max-width: 1000px;
-    margin: 40px auto;
-    background: #ffffff;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+  max-width: 1000px;
+  margin: 32px auto;
+  background: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
 }
 
 .table-container h2 {
-    display: flex;
-    align-items: center;
-    font-size: 22px;
-    font-weight: 600;
-    color: #2c3e50;
-    margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 16px;
 }
 
-/* Logs table */
+/* Filters */
+.filter-form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 10px 0 16px;
+}
+
+.filter-form select,
+.filter-form input[type="search"],
+.filter-form button,
+.filter-form a {
+  padding: 8px 10px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #d7d7d7;
+  background: #f7faff;
+}
+
+.filter-form button {
+  border: none;
+  background: #3498db;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+.filter-form button:hover { filter: brightness(.95); }
+
+.filter-form a {
+  border: none;
+  background: #ecf0f1;
+  color: #2c3e50;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.filter-form a:hover { background: #d0d3d4; }
+
+/* Table */
 .logs-table {
-    width: 100%;
-    border-collapse: collapse;
-    border-radius: 8px;
-    overflow: hidden;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,.04);
 }
 
-.logs-table thead {
-    background: #2c3e50;
-    color: #ffffff;
-}
-
-.logs-table th {
-    text-align: left;
-    padding: 12px 15px;
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
+.logs-table thead th {
+  background: #2c3e50;
+  color: #ffffff;
+  text-align: left;
+  padding: 12px 14px;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .logs-table td {
-    padding: 12px 15px;
-    font-size: 14px;
-    border-bottom: 1px solid #ececec;
-    color: #333;
+  padding: 12px 14px;
+  font-size: 14px;
+  border-bottom: 1px solid #f0f2f5;
+  color: #333;
+  vertical-align: middle;
 }
 
-/* Row hover */
+.logs-table tbody tr:nth-child(odd) { background: #fcfdff; }
+
 .logs-table tbody tr:hover {
-    background: #f9fcff;
-    transition: background 0.3s;
+  background: #f7fbff;
+  transition: background .2s ease;
 }
+
+/* Monospace helpers for technical fields */
+.mono { font-family: ui-monospace, Menlo, Monaco, Consolas, "Courier New", monospace; }
 
 /* Status badges */
 .status {
-    display: inline-block;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-weight: bold;
-    font-size: 14px;
-    text-align: center;
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 12px;
+  text-align: center;
+  border: 1px solid transparent;
 }
-
 .status.success {
-    background: #28c76f;
-    color: white;
-    border: none;
+  background: #ecfdf5;
+  color: #065f46;
+  border-color: #a7f3d0;
 }
-
 .status.fail {
-    background: #ea5455;
-    color: white;
-    border: none;
+  background: #fef2f2;
+  color: #7f1d1d;
+  border-color: #fecaca;
 }
 
 /* Empty state */
 .empty {
-    text-align: center;
-    padding: 20px;
-    font-size: 14px;
-    color: #888;
+  text-align: center;
+  padding: 20px;
+  font-size: 14px;
+  color: #888;
 }
 
-.filter-form {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
+/* Pagination */
+.pagination {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 14px;
+  flex-wrap: wrap;
 }
+.page-btn {
+  background: #3498db;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 700;
+}
+.page-btn:hover { filter: brightness(.95); }
+.page-info { color: #6b7280; }
 
-.filter-form select, .filter-form button, .filter-form a {
-    padding: 8px 10px;
-    font-size: 14px;
+/* Responsive tweaks */
+@media (max-width: 720px) {
+  .table-container { padding: 18px; }
+  .logs-table td, .logs-table thead th { padding: 10px 12px; }
 }

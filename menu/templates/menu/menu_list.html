@@ -1,3 +1,4 @@
+{# menu/templates/menu/menu_list.html #}
 {% extends "base.html" %}
 {% load static %}
 
@@ -7,88 +8,67 @@
 
 {% block content %}
 <div class="table-container">
-    <div class="header-row">
-        <h2>📖 Menu Items</h2>
-        <a href="{% url 'menu:menu_create' %}" class="btn-link">+ Add New Item</a>
-    </div>
+  <div class="table-header">
+    <h2>📋 Manage Menu Items</h2>
+    <a href="{% url 'menu:create' %}" class="btn-primary">➕ Add Item</a>
+  </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Image</th>
-                <th>Name & Description</th>
-                <th>Category</th>
-                <th>Tags</th>
-                <th>Price</th>
-                <th>Available</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% if menu_items %}
-            {% for item in menu_items %}
-            <tr>
-                <!-- Image -->
-                <td>
-                    {% if item.image %}
-                        <img src="{{ item.image.url }}" width="60" height="60" style="border-radius:6px;object-fit:cover;" alt="{{ item.name }}">
-                    {% else %}
-                        <div style="width:60px;height:60px;display:flex;align-items:center;justify-content:center;background:#f0f0f0;border-radius:6px;color:#aaa;font-size:12px;">No Img</div>
-                    {% endif %}
-                </td>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Item</th>
+          <th>Description</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td class="mono">#{{ item.id }}</td>
 
-                <!-- Name + Description -->
-                <td>
-                    <div class="menu-item-name">
-                        <strong>{{ item.name }}</strong>
-                    </div>
-                    {% if item.description %}
-                        <div class="menu-item-description">{{ item.description }}</div>
-                    {% endif %}
-                </td>
+          <td class="menu-item-cell">
+            {% if item.image %}
+              <img src="{{ item.image.url }}" alt="{{ item.name }}" class="menu-thumb" width="50" height="50" loading="lazy">
+            {% else %}
+              <span class="menu-avatar menu-avatar--50">{{ item.name|first|upper }}</span>
+            {% endif %}
+            <div class="menu-item-text">
+              <div class="menu-item-title">{{ item.name }}</div>
+            </div>
+          </td>
 
-                <!-- Category -->
-                <td><span style="text-transform:capitalize;">{{ item.get_category_display }}</span></td>
+          <td>{{ item.description }}</td>
+          <td>{{ item.get_category_display }}</td>
+          <td>₱{{ item.price }}</td>
 
-                <!-- Tags -->
-                <td>
-                    {% if item.tags %}
-                        <span style="font-size:13px;color:#555;">{{ item.tags }}</span>
-                    {% else %}
-                        <span style="color:#aaa;">—</span>
-                    {% endif %}
-                </td>
+          <td>
+            {% if item.is_available %}
+              <span class="status success">Available</span>
+            {% else %}
+              <span class="status fail">Unavailable</span>
+            {% endif %}
+          </td>
 
-                <!-- Price -->
-                <td class="menu-price">₱{{ item.price }}</td>
-
-                <!-- Available -->
-                <td>
-                    {% if item.is_available %}
-                        <span class="status-badge completed">Yes</span>
-                    {% else %}
-                        <span class="status-badge cancelled">No</span>
-                    {% endif %}
-                </td>
-
-                <!-- Actions -->
-                <td class="actions-cell">
-                    <a href="{% url 'menu:menu_update' item.id %}" class="btn-small primary">Edit</a>
-                    <form action="{% url 'menu:menu_delete' item.id %}" method="post" style="display:inline-block;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn-small danger" onclick="return confirm('Delete this item?')">
-                            Delete
-                        </button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        {% else %}
-            <tr>
-                <td colspan="7" style="text-align:center;color:#888;padding:20px;">No items in the menu.</td>
-            </tr>
-        {% endif %}
-        </tbody>
+          <td class="actions-cell">
+            <a href="{% url 'menu:edit' item.id %}" class="btn-small primary">Edit</a>
+            <form action="{% url 'menu:delete' item.id %}" method="post" style="display:inline" onsubmit="return confirm('Delete {{ item.name }}?');">
+              {% csrf_token %}
+              <button type="submit" class="btn-small danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="empty">No menu items found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
+  </div>
 </div>
 {% endblock %}

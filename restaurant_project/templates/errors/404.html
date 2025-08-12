@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Not Found{% endblock %}
+{% block content %}
+<div class="form-container">
+  <h2>Page not found (404)</h2>
+  <p class="muted">The thing you're looking for isn't here.</p>
+  <p><a class="btn-secondary" href="{% url 'accounts:dashboard' %}">Back to Dashboard</a></p>
+</div>
+{% endblock %}
