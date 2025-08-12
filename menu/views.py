@@ -5,6 +5,8 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 import logging
 
+from accounts.views import require_recent_reauth
+
 from .forms import MenuItemForm
 from .models import MenuItem
 from logs.utils import audit_log  # <- centralized audit helper
@@ -87,6 +89,7 @@ def menu_edit_view(request, pk):
 
 
 @login_required
+@require_recent_reauth
 def menu_delete_view(request, pk):
     if not _is_manager(request.user):
         return _deny(request, "Delete menu item (manager-only)")

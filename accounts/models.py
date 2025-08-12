@@ -18,6 +18,15 @@ class User(AbstractUser):
     def mark_password_changed(self):
         self.password_changed_at = timezone.now()
         self.save(update_fields=["password_changed_at"])
+    
+    last_auth_event_at = models.DateTimeField(null=True, blank=True)
+    last_auth_event_ok = models.BooleanField(null=True, blank=True)
+    last_auth_event_ip = models.GenericIPAddressField(null=True, blank=True)
+    last_auth_event_ua = models.TextField(blank=True, null=True)
+
+    def is_locked_now(self):
+        return bool(self.locked_until and timezone.now() < self.locked_until)
+
 
 class PasswordHistory(models.Model):
     """

@@ -30,7 +30,7 @@ INSTALLED_APPS = [
     'django_extensions',
 
     # Custom apps
-    'accounts',   # if you created AccountsConfig + signals, you can also use: 'accounts.apps.AccountsConfig'
+    'accounts.apps.AccountsConfig',
     'menu',
     'orders',
     'logs',
@@ -169,3 +169,7 @@ LOGGING = {
         },
     },
 }
+
+# Cookie Security — these should be True in production over HTTPS
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG

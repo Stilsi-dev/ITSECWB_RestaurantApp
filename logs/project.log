@@ -17773,3 +17773,10 @@ Watching for file changes with StatReloader
 "GET /manage-users/ HTTP/1.1" 200 7065
 D:\FILES\DLSU\CAPSTONE\ITSECWB_CS\restaurant_project\settings.py changed, reloading.
 Watching for file changes with StatReloader
+D:\FILES\DLSU\CAPSTONE\ITSECWB_CS\accounts\models.py changed, reloading.
+Watching for file changes with StatReloader
+Watching for file changes with StatReloader
+"GET /logout/ HTTP/1.1" 302 0
+"GET /login/?next=/logout/ HTTP/1.1" 200 2228
+Authentication failure for username=admin path=/login/
+"POST /login/?next=/logout/ HTTP/1.1" 200 2567

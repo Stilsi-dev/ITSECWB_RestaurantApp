@@ -3,21 +3,23 @@ from __future__ import annotations
 
 from datetime import timedelta
 from functools import wraps
-
 import logging
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
+from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods, require_POST
-from django.http import Http404, HttpResponseForbidden
 
 from .models import PasswordHistory
+
 # Prefer the centralized audit util; keep a safe fallback if it's missing
 try:
     from logs.utils import audit_log  # type: ignore
@@ -107,6 +109,38 @@ def _settings_int(name: str, default: int) -> int:
 
 
 # -----------------------------
+# Re-authentication (2.1.13)
+# -----------------------------
+
+def require_recent_reauth(viewfunc):
+    """
+    Decorator for critical operations.
+    If the user hasn’t re-authed within REAUTH_TIMEOUT_MINUTES, send them to /reauth/?next=...
+    """
+    @wraps(viewfunc)
+    @login_required
+    def _wrapped(request, *args, **kwargs):
+        ts = request.session.get("reauth_at")
+        timeout = _settings_int("REAUTH_TIMEOUT_MINUTES", 5)
+
+        valid_at = None
+        if ts:
+            try:
+                valid_at = timezone.datetime.fromisoformat(ts)
+                if timezone.is_naive(valid_at):
+                    valid_at = timezone.make_aware(valid_at, timezone.get_current_timezone())
+            except Exception:
+                valid_at = None
+
+        if not valid_at or (timezone.now() - valid_at) > timedelta(minutes=timeout):
+            return redirect(f"/reauth/?next={request.get_full_path()}")
+
+        return viewfunc(request, *args, **kwargs)
+
+    return _wrapped
+
+
+# -----------------------------
 # Login / Register / Logout
 # -----------------------------
 
@@ -118,24 +152,68 @@ def login_view(request):
     form = AuthenticationForm(request, data=request.POST or None)
 
     if request.method == "POST":
-        # best-effort fetch to tailor lockout msg
         username = (request.POST.get("username") or "").strip()
         user_for_msg = None
         if username:
             try:
-                user_for_msg = User.objects.get(username=username)
-            except User.DoesNotExist:
+                user_for_msg = User.objects.filter(username=username).first()
+            except Exception:
                 user_for_msg = None
 
         if form.is_valid():
             user = form.get_user()
+
+            # Enforce lockout defensively here in case the backend doesn’t block it:
+            locked_until = getattr(user, "locked_until", None)
+            if locked_until and timezone.now() < locked_until:
+                messages.error(
+                    request,
+                    f"Account temporarily locked due to failed attempts. "
+                    f"Try again after {locked_until.strftime('%Y-%m-%d %H:%M')}."
+                )
+                audit_log(request, user, "Login attempt during lockout", "fail")
+                return redirect("accounts:login")
+
+            # Compute the "last use" banner BEFORE we call login()
+            # - previous successful login -> user.last_login (if available)
+            # - last failed attempt -> from cache set by signals
+            prev_success = user.last_login  # may be None on first login
+            last_failed = cache.get(f"last_failed_auth:{user.username}") or {}
+
+            # Now log the user in
             login(request, user)
             audit_log(request, user, "User logged in", "success")
+
+            # Build and show the banner exactly once
+            banner = None
+            # Choose most recent between prev_success and last_failed["ts"]
+            ts_success = prev_success
+            ts_failed = None
+            try:
+                if last_failed.get("ts"):
+                    ts_failed = timezone.datetime.fromisoformat(last_failed["ts"])
+                    if timezone.is_naive(ts_failed):
+                        ts_failed = timezone.make_aware(ts_failed, timezone.get_current_timezone())
+            except Exception:
+                ts_failed = None
+
+            # Decide which to show
+            show_failed = ts_failed and (not ts_success or ts_failed > ts_success)
+            if show_failed:
+                when = ts_failed.astimezone(timezone.get_current_timezone()).strftime("%Y-%m-%d %H:%M")
+                ip = last_failed.get("ip")
+                banner = f"Last account use: failed login on {when}" + (f" from {ip}" if ip else "")
+            elif ts_success:
+                when = ts_success.astimezone(timezone.get_current_timezone()).strftime("%Y-%m-%d %H:%M")
+                banner = f"Last account use: successful login on {when}"
+
+            if banner:
+                messages.info(request, banner)
+
             nxt = request.GET.get("next") or request.POST.get("next")
             return redirect(nxt or "accounts:dashboard")
 
         # invalid login — generic error (don’t leak which part failed)
-        # additionally, if your backend sets locked_until on the user, we can show a friendly cooldown
         locked_until = getattr(user_for_msg, "locked_until", None)
         if locked_until and timezone.now() < locked_until:
             messages.error(
@@ -254,6 +332,7 @@ def dashboard_view(request):
 
 @login_required
 @require_http_methods(["GET", "POST"])
+@require_recent_reauth  # critical: role changes require fresh auth
 def manage_users_view(request):
     if getattr(request.user, "role", None) != "admin":
         return _fail_secure_forbidden(request, "Manage users (admin-only)")
@@ -288,8 +367,10 @@ def manage_users_view(request):
     users = User.objects.all().order_by("username")
     audit_log(request, request.user, "Viewed manage users", "success")
     return render(request, "accounts/manage_users.html", {"users": users})
+
+
 # -----------------------------
-# Re-authentication (2.1.13)
+# Re-authentication views
 # -----------------------------
 
 @login_required
@@ -316,34 +397,6 @@ def reauth_view(request):
     return render(request, "accounts/reauth.html", context)
 
 
-def require_recent_reauth(viewfunc):
-    """
-    Decorator for critical operations.
-    If the user hasn’t re-authed within REAUTH_TIMEOUT_MINUTES, send them to /reauth/?next=...
-    """
-    @wraps(viewfunc)
-    @login_required
-    def _wrapped(request, *args, **kwargs):
-        ts = request.session.get("reauth_at")
-        timeout = _settings_int("REAUTH_TIMEOUT_MINUTES", 5)
-
-        valid_at = None
-        if ts:
-            try:
-                valid_at = timezone.datetime.fromisoformat(ts)
-                if timezone.is_naive(valid_at):
-                    valid_at = timezone.make_aware(valid_at, timezone.get_current_timezone())
-            except Exception:
-                valid_at = None
-
-        if not valid_at or (timezone.now() - valid_at) > timedelta(minutes=timeout):
-            return redirect(f"/reauth/?next={request.get_full_path()}")
-
-        return viewfunc(request, *args, **kwargs)
-
-    return _wrapped
-
-
 # -----------------------------
 # Security Question setup (2.1.9)
 # -----------------------------
@@ -359,7 +412,6 @@ def setup_security_question_view(request):
     answer_existing = (getattr(user, "security_answer_hash", "") or "").strip()
 
     if question_existing and answer_existing:
-        # Already set — let them leave
         messages.info(request, "Your security question is already set.")
         return redirect("accounts:dashboard")
 
@@ -375,8 +427,21 @@ def setup_security_question_view(request):
 
         if not a:
             errs.append("Please provide an answer.")
-        elif len(a) < 3:
-            errs.append("Answer must be at least 3 characters.")
+        elif len(a) < 6:
+            errs.append("Answer must be at least 6 characters.")
+        else:
+            # basic entropy/triviality checks
+            simple = {"password", "qwerty", "123456", "abcdef", "iloveyou", "unknown", "n/a"}
+            if a.lower() in simple:
+                errs.append("Answer is too common; choose something more unique.")
+            if len(set(a.lower())) <= 2:
+                errs.append("Answer appears too simple; add more variety.")
+            uname = (getattr(user, "username", "") or "").lower()
+            mail_local = ((getattr(user, "email", "") or "").lower().split("@")[0]) if getattr(user, "email", None) else ""
+            if uname and uname in a.lower():
+                errs.append("Answer should not contain your username.")
+            if mail_local and mail_local in a.lower():
+                errs.append("Answer should not contain your email local-part.")
 
         if errs:
             audit_log(request, user, "Setup security question validation failed", "fail")
@@ -404,6 +469,7 @@ def setup_security_question_view(request):
 
 @login_required
 @require_http_methods(["GET", "POST"])
+@require_recent_reauth  # critical operation
 def change_password_view(request):
     """
     User-initiated password change:
@@ -432,8 +498,8 @@ def change_password_view(request):
             errs.append("Please enter and confirm your new password.")
         elif new1 != new2:
             errs.append("New passwords do not match.")
-        elif len(new1) < 8:
-            errs.append("New password must be at least 8 characters.")
+        elif len(new1) < 12:
+            errs.append("New password must be at least 12 characters.")
         elif _is_reused_password(user, new1, hist_n):
             errs.append("You cannot reuse a recent password.")
 
@@ -556,8 +622,8 @@ def reset_set_password_view(request):
             errs.append("Please enter and confirm your new password.")
         elif new1 != new2:
             errs.append("New passwords do not match.")
-        elif len(new1) < 8:
-            errs.append("New password must be at least 8 characters.")
+        elif len(new1) < 12:
+            errs.append("New password must be at least 12 characters.")
         elif _is_reused_password(user, new1, hist_n):
             errs.append("You cannot reuse a recent password.")
 

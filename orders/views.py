@@ -6,6 +6,8 @@ from django.http import Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 import logging
 
+from accounts.views import require_recent_reauth
+
 from .models import Order
 from .forms import OrderForm, StaffOrderForm, OrderItemFormSet
 from menu.models import MenuItem
@@ -127,6 +129,7 @@ def order_update_view(request, pk: int):
 
 
 @login_required
+@require_recent_reauth
 @require_POST
 def order_status_transition(request, pk, to: str):
     order = get_object_or_404(Order, pk=pk)
@@ -152,7 +155,7 @@ def order_status_transition(request, pk, to: str):
 
 
 @login_required
-@require_POST
+@require_recent_reauth
 def order_delete_view(request, pk):
     order = get_object_or_404(Order, pk=pk)
     is_staff = _is_manager(request.user)
