@@ -17739,3 +17739,35 @@ Not Found: /favicon.ico
 "GET /favicon.ico HTTP/1.1" 404 4697
 D:\FILES\DLSU\CAPSTONE\ITSECWB_CS\accounts\views.py changed, reloading.
 Watching for file changes with StatReloader
+"GET /menu/ HTTP/1.1" 200 7693
+"GET /menu/ HTTP/1.1" 200 7693
+"GET /menu/3/edit/ HTTP/1.1" 200 4961
+"GET /manage-users/ HTTP/1.1" 200 6759
+"GET /orders/ HTTP/1.1" 200 31022
+"GET /static/css/orders.css HTTP/1.1" 304 0
+"GET /manage-users/ HTTP/1.1" 200 6759
+"POST /manage-users/ HTTP/1.1" 200 6759
+"POST /manage-users/ HTTP/1.1" 200 6759
+"POST /manage-users/ HTTP/1.1" 200 6759
+"POST /manage-users/ HTTP/1.1" 200 6759
+"POST /manage-users/ HTTP/1.1" 200 6759
+"GET /static/css/logs.css HTTP/1.1" 304 0
+"POST /manage-users/ HTTP/1.1" 200 6759
+D:\FILES\DLSU\CAPSTONE\ITSECWB_CS\accounts\models.py changed, reloading.
+Watching for file changes with StatReloader
+D:\FILES\DLSU\CAPSTONE\ITSECWB_CS\accounts\views.py changed, reloading.
+Watching for file changes with StatReloader
+D:\FILES\DLSU\CAPSTONE\ITSECWB_CS\accounts\models.py changed, reloading.
+Watching for file changes with StatReloader
+D:\FILES\DLSU\CAPSTONE\ITSECWB_CS\accounts\views.py changed, reloading.
+Watching for file changes with StatReloader
+D:\FILES\DLSU\CAPSTONE\ITSECWB_CS\accounts\views.py changed, reloading.
+Watching for file changes with StatReloader
+"POST /manage-users/ HTTP/1.1" 302 0
+"GET /login/?next=/manage-users/ HTTP/1.1" 200 2219
+"POST /login/?next=/manage-users/ HTTP/1.1" 302 0
+"GET /manage-users/ HTTP/1.1" 200 6903
+"POST /manage-users/ HTTP/1.1" 302 0
+"GET /manage-users/ HTTP/1.1" 200 7063
+"POST /manage-users/ HTTP/1.1" 302 0
+"GET /manage-users/ HTTP/1.1" 200 7065

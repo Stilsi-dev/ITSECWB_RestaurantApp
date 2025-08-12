@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from django.shortcuts import redirect, render, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods, require_POST
 from django.http import Http404, HttpResponseForbidden
@@ -253,15 +253,41 @@ def dashboard_view(request):
 
 
 @login_required
+@require_http_methods(["GET", "POST"])
 def manage_users_view(request):
     if getattr(request.user, "role", None) != "admin":
         return _fail_secure_forbidden(request, "Manage users (admin-only)")
 
+    if request.method == "POST":
+        user_id = request.POST.get("user_id")
+        new_role = request.POST.get("role")
+
+        if new_role not in ("customer", "manager", "admin"):
+            messages.error(request, "Invalid role.")
+            return redirect("accounts:manage_users")
+
+        target = get_object_or_404(User, pk=user_id)
+
+        # Prevent removing the last admin
+        if target.role == "admin" and new_role != "admin":
+            other_admin_exists = User.objects.exclude(pk=target.pk).filter(role="admin").exists()
+            if not other_admin_exists:
+                messages.error(request, "You can't remove the last admin.")
+                return redirect("accounts:manage_users")
+
+        # Persist role and align Django flags
+        target.role = new_role
+        target.is_staff = new_role in ("manager", "admin")
+        target.is_superuser = new_role == "admin"
+        target.save(update_fields=["role", "is_staff", "is_superuser"])
+
+        audit_log(request, request.user, f"Changed role for {target.username} to {new_role}", "success")
+        messages.success(request, f"Updated {target.username} to {new_role.title()}.")
+        return redirect("accounts:manage_users")
+
     users = User.objects.all().order_by("username")
     audit_log(request, request.user, "Viewed manage users", "success")
     return render(request, "accounts/manage_users.html", {"users": users})
-
-
 # -----------------------------
 # Re-authentication (2.1.13)
 # -----------------------------

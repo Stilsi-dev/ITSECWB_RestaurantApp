@@ -25,7 +25,7 @@
                 <td>{{ user.email }}</td>
                 <td>{{ user.role|title }}</td>
                 <td>
-                    <form method="post">
+                    <form method="post" action="{% url 'accounts:manage_users' %}">
                         {% csrf_token %}
                         <input type="hidden" name="user_id" value="{{ user.id }}">
                         <select name="role">
