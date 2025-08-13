@@ -17780,3 +17780,201 @@ Watching for file changes with StatReloader
 "GET /login/?next=/logout/ HTTP/1.1" 200 2228
 Authentication failure for username=admin path=/login/
 "POST /login/?next=/logout/ HTTP/1.1" 200 2567
+Watching for file changes with StatReloader
+"GET /login/?next=/logout/ HTTP/1.1" 200 2228
+Not Found: /favicon.ico
+"GET /favicon.ico HTTP/1.1" 404 4697
+"GET /menu HTTP/1.1" 301 0
+"GET /menu/ HTTP/1.1" 302 0
+"GET /login/?next=/menu/ HTTP/1.1" 200 2226
+"POST /login/?next=/menu/ HTTP/1.1" 302 0
+Access control failure: user=customer1 path=/menu/ action=View menu list (manager-only)
+Forbidden: /menu/
+"GET /menu/ HTTP/1.1" 403 43
+"GET /login/?next=/menu/ HTTP/1.1" 302 0
+"GET /dashboard/ HTTP/1.1" 200 1929
+"GET /orders/ HTTP/1.1" 200 24848
+"GET /static/js/order_list.js HTTP/1.1" 304 0
+"GET /static/css/orders.css HTTP/1.1" 304 0
+"GET /dashboard/ HTTP/1.1" 200 1748
+"GET /orders/create/ HTTP/1.1" 200 17148
+"GET /static/js/order_form.js HTTP/1.1" 304 0
+"GET /orders/ HTTP/1.1" 200 24848
+"GET /orders/16/edit/ HTTP/1.1" 200 18022
+"GET /orders/16/edit/ HTTP/1.1" 200 18022
+"GET /orders/15/edit/ HTTP/1.1" 200 17146
+"POST /orders/15/edit/ HTTP/1.1" 302 0
+"GET /orders/ HTTP/1.1" 200 25571
+"GET /logout/ HTTP/1.1" 302 0
+"GET /login/ HTTP/1.1" 200 2330
+Authentication failure for username=admin path=/login/
+"POST /login/ HTTP/1.1" 200 2517
+"GET /register/ HTTP/1.1" 200 2656
+"GET /register/ HTTP/1.1" 200 2656
+"POST /login/ HTTP/1.1" 302 0
+"GET /dashboard/ HTTP/1.1" 200 2206
+"GET /admin/ HTTP/1.1" 200 8841
+"GET /admin/accounts/user/ HTTP/1.1" 200 14850
+"GET /admin/jsi18n/ HTTP/1.1" 200 3343
+"GET /admin/accounts/user/15/change/ HTTP/1.1" 200 24988
+"GET /admin/jsi18n/ HTTP/1.1" 200 3343
+"GET /admin/accounts/user/15/delete/ HTTP/1.1" 200 7632
+"POST /admin/accounts/user/15/delete/ HTTP/1.1" 302 0
+"GET /admin/accounts/user/ HTTP/1.1" 200 14412
+"GET /admin/jsi18n/ HTTP/1.1" 200 3343
+"GET /admin/accounts/user/12/change/ HTTP/1.1" 200 24947
+"GET /admin/jsi18n/ HTTP/1.1" 200 3343
+"GET /admin/accounts/user/12/delete/ HTTP/1.1" 200 7743
+"POST /admin/accounts/user/12/delete/ HTTP/1.1" 302 0
+"GET /admin/accounts/user/ HTTP/1.1" 200 13821
+"GET /admin/jsi18n/ HTTP/1.1" 200 3343
+"GET / HTTP/1.1" 302 0
+"GET /dashboard/ HTTP/1.1" 200 2014
+"GET /logout/ HTTP/1.1" 302 0
+"GET /login/ HTTP/1.1" 200 2330
+"GET /register/ HTTP/1.1" 200 2656
+Registration validation errors: {'username': [], 'email': [], 'password1': ['Password must be at least 8 characters.'], 'password2': ['Passwords do not match.'], 'non_field': []}
+"POST /register/ HTTP/1.1" 200 2968
+"POST /register/ HTTP/1.1" 302 0
+"GET /setup-security-question/ HTTP/1.1" 200 3223
+"POST /setup-security-question/ HTTP/1.1" 302 0
+"GET /dashboard/ HTTP/1.1" 200 1904
+"GET /logout/ HTTP/1.1" 302 0
+"GET /login/ HTTP/1.1" 200 2330
+Authentication failure for username=customer12 path=/login/
+"POST /login/ HTTP/1.1" 200 2522
+Authentication failure for username=customer12 path=/login/
+"POST /login/ HTTP/1.1" 200 2522
+Authentication failure for username=customer12 path=/login/
+"POST /login/ HTTP/1.1" 200 2408
+Authentication failure for username=customer12 path=/login/
+"POST /login/ HTTP/1.1" 200 2522
+Authentication failure for username=customer12 path=/login/
+"POST /login/ HTTP/1.1" 200 2522
+Authentication failure for username=customer12 path=/login/
+"POST /login/ HTTP/1.1" 200 2522
+Authentication failure for username=customer12 path=/login/
+"POST /login/ HTTP/1.1" 200 2573
+"GET /reset/ HTTP/1.1" 200 1650
+"POST /login/ HTTP/1.1" 302 0
+"GET /dashboard/ HTTP/1.1" 200 2195
+"GET /admin/ HTTP/1.1" 200 8754
+"GET /admin/accounts/passwordhistory/ HTTP/1.1" 200 9808
+"GET /admin/jsi18n/ HTTP/1.1" 200 3343
+"GET /admin/ HTTP/1.1" 200 8754
+"GET /admin/accounts/user/ HTTP/1.1" 200 14281
+"GET /admin/jsi18n/ HTTP/1.1" 200 3343
+"GET /admin/accounts/user/16/change/ HTTP/1.1" 200 24991
+"GET /admin/jsi18n/ HTTP/1.1" 200 3343
+"GET /admin/accounts/user/ HTTP/1.1" 200 14281
+"GET /admin/accounts/user/16/change/ HTTP/1.1" 200 24991
+"GET /admin/jsi18n/ HTTP/1.1" 200 3343
+"GET /admin/accounts/user/16/change/ HTTP/1.1" 200 24991
+"GET /admin/jsi18n/ HTTP/1.1" 200 3343
+D:\FILES\DLSU\CAPSTONE\ITSECWB_CS\accounts\admin.py changed, reloading.
+Watching for file changes with StatReloader
+"GET /admin/accounts/user/16/change/ HTTP/1.1" 200 25211
+"GET /admin/jsi18n/ HTTP/1.1" 200 3343
+"GET /admin/accounts/user/16/change/ HTTP/1.1" 200 25211
+"GET /admin/jsi18n/ HTTP/1.1" 200 3343
+"GET /admin/accounts/user/16/change/ HTTP/1.1" 200 25211
+"GET /admin/jsi18n/ HTTP/1.1" 200 3343
+"POST /admin/accounts/user/16/change/ HTTP/1.1" 302 0
+"GET /admin/accounts/user/16/change/ HTTP/1.1" 200 25443
+"GET /admin/jsi18n/ HTTP/1.1" 200 3343
+"POST /admin/logout/ HTTP/1.1" 302 0
+"GET /login/ HTTP/1.1" 200 2178
+"GET /reset/ HTTP/1.1" 200 1650
+"POST /reset/ HTTP/1.1" 302 0
+"GET /reset/question/ HTTP/1.1" 200 1765
+"POST /reset/question/ HTTP/1.1" 302 0
+"GET /reset/new/ HTTP/1.1" 200 1855
+Password reset set validation errors user=customer12: ['You changed your password recently. Please wait at least 1 day(s).']
+"POST /reset/new/ HTTP/1.1" 200 2049
+D:\FILES\DLSU\CAPSTONE\ITSECWB_CS\accounts\admin.py changed, reloading.
+Watching for file changes with StatReloader
+D:\FILES\DLSU\CAPSTONE\ITSECWB_CS\accounts\admin.py changed, reloading.
+Watching for file changes with StatReloader
+"GET /login/ HTTP/1.1" 200 2178
+"POST /login/ HTTP/1.1" 302 0
+"GET /dashboard/ HTTP/1.1" 200 2195
+"GET /admin/ HTTP/1.1" 200 8800
+"GET /admin/accounts/user/ HTTP/1.1" 200 14277
+"GET /admin/jsi18n/ HTTP/1.1" 200 3343
+"GET /admin/accounts/user/16/change/ HTTP/1.1" 200 25211
+"GET /admin/jsi18n/ HTTP/1.1" 200 3343
+D:\FILES\DLSU\CAPSTONE\ITSECWB_CS\accounts\admin.py changed, reloading.
+Watching for file changes with StatReloader
+"GET /admin/accounts/user/16/change/ HTTP/1.1" 200 25459
+"GET /admin/jsi18n/ HTTP/1.1" 200 3343
+"POST /admin/accounts/user/16/change/ HTTP/1.1" 302 0
+"GET /admin/accounts/user/16/change/ HTTP/1.1" 200 25691
+"GET /admin/jsi18n/ HTTP/1.1" 200 3343
+"POST /admin/logout/ HTTP/1.1" 302 0
+"GET /login/ HTTP/1.1" 200 2178
+"GET /reset/ HTTP/1.1" 200 1650
+"POST /reset/ HTTP/1.1" 302 0
+"GET /reset/question/ HTTP/1.1" 200 1765
+"POST /reset/question/ HTTP/1.1" 302 0
+"GET /reset/new/ HTTP/1.1" 200 1855
+Password reset set validation errors user=customer12: ['You changed your password recently. Please wait at least 1 day(s).', 'You cannot reuse a recent password.']
+"POST /reset/new/ HTTP/1.1" 200 2190
+Password reset set validation errors user=customer12: ['You changed your password recently. Please wait at least 1 day(s).']
+"POST /reset/new/ HTTP/1.1" 200 2049
+"GET /register/ HTTP/1.1" 200 2656
+"GET /login/ HTTP/1.1" 200 2178
+"POST /login/ HTTP/1.1" 302 0
+"GET /dashboard/ HTTP/1.1" 200 2195
+"GET /admin/ HTTP/1.1" 200 8850
+"GET /admin/accounts/user/ HTTP/1.1" 200 14281
+"GET /admin/jsi18n/ HTTP/1.1" 200 3343
+"GET /admin/accounts/user/16/change/ HTTP/1.1" 200 25459
+"GET /admin/jsi18n/ HTTP/1.1" 200 3343
+"POST /admin/accounts/user/16/change/ HTTP/1.1" 302 0
+"GET /admin/accounts/user/16/change/ HTTP/1.1" 200 25691
+"GET /admin/jsi18n/ HTTP/1.1" 200 3343
+"POST /admin/logout/ HTTP/1.1" 302 0
+"GET /login/ HTTP/1.1" 200 2178
+"GET /reset/ HTTP/1.1" 200 1650
+"POST /reset/ HTTP/1.1" 302 0
+"GET /reset/question/ HTTP/1.1" 200 1765
+"POST /reset/question/ HTTP/1.1" 302 0
+"GET /reset/new/ HTTP/1.1" 200 1855
+"POST /reset/new/ HTTP/1.1" 302 0
+"GET /login/ HTTP/1.1" 200 2349
+"GET /reset/ HTTP/1.1" 200 1650
+"POST /reset/ HTTP/1.1" 302 0
+"GET /reset/question/ HTTP/1.1" 200 1765
+"POST /reset/question/ HTTP/1.1" 302 0
+"GET /reset/new/ HTTP/1.1" 200 1855
+Password reset set validation errors user=customer12: ['You changed your password recently. Please wait at least 1 day(s).']
+"POST /reset/new/ HTTP/1.1" 200 2049
+"GET /reset/new/ HTTP/1.1" 200 1855
+"GET /login/ HTTP/1.1" 200 2178
+Authentication failure for username=customer1 path=/login/
+"POST /login/ HTTP/1.1" 200 2521
+"POST /login/ HTTP/1.1" 302 0
+"GET /dashboard/ HTTP/1.1" 200 1940
+"GET /logout/ HTTP/1.1" 302 0
+"GET /login/ HTTP/1.1" 200 2330
+"POST /login/ HTTP/1.1" 302 0
+"GET /dashboard/ HTTP/1.1" 200 2195
+"GET /logs/ HTTP/1.1" 200 19645
+"GET /static/css/logs.css HTTP/1.1" 304 0
+"GET /dashboard/ HTTP/1.1" 200 2014
+"GET /orders/ HTTP/1.1" 200 31588
+"GET /menu/ HTTP/1.1" 200 7693
+"GET /logs/ HTTP/1.1" 200 19629
+"GET /logout/ HTTP/1.1" 302 0
+"GET /login/ HTTP/1.1" 200 2330
+"POST /login/ HTTP/1.1" 302 0
+"GET /dashboard/ HTTP/1.1" 200 1929
+"GET /logs/ HTTP/1.1" 302 0
+"GET /dashboard/ HTTP/1.1" 200 1891
+Access control failure: user=customer1 path=/menu/ action=View menu list (manager-only)
+Forbidden: /menu/
+"GET /menu/ HTTP/1.1" 403 43
+"GET /dashboard/ HTTP/1.1" 200 1748
+Access control failure: user=customer1 path=/menu/new/ action=Create menu item (manager-only)
+Forbidden: /menu/new/
+"GET /menu/new/ HTTP/1.1" 403 43

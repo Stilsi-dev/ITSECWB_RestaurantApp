@@ -34,7 +34,7 @@ class UserAdmin(DjangoUserAdmin):
         }),
     )
 
-    readonly_fields = ("failed_logins", "locked_until", "password_changed_at")
+    readonly_fields = ("failed_logins",)
 
     def lock_status(self, obj):
         if obj.locked_until and obj.locked_until > timezone.now():
