@@ -173,3 +173,4 @@ LOGGING = {
 # Cookie Security — these should be True in production over HTTPS
 CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_HTTPONLY = True
