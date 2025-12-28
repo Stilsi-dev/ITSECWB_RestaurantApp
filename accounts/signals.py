@@ -1,4 +1,14 @@
-# accounts/signals.py
+"""Authentication event signals.
+
+This module centralizes side effects of authentication events:
+- Tracks failed login attempts and applies a lockout window.
+- Resets lockout counters on successful login.
+- Records audit-log entries for login success/failure and logout.
+
+The signals are designed to be best-effort: audit logging should never break
+the authentication flow.
+"""
+
 from __future__ import annotations
 
 from datetime import timedelta
@@ -14,6 +24,7 @@ User = get_user_model()
 
 
 def _client_meta(request):
+    """Extract client IP and User-Agent from the request safely."""
     if not request:
         return None, ""
     ip = request.META.get("REMOTE_ADDR") or None
@@ -95,6 +106,7 @@ def on_logged_in(sender, request, user, **kwargs):
 
 @receiver(user_logged_out)
 def on_logout(sender, request, user, **kwargs):
+    """Audit logout events (best-effort)."""
     try:
         audit_log(request, user, "Logout", "success")
     except Exception:

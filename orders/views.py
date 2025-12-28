@@ -1,4 +1,13 @@
-# orders/views.py
+"""Order workflow views.
+
+Implements order creation and management with role-aware authorization:
+- Customers can create and manage only their own orders.
+- Staff (manager/admin) can view/manage all orders.
+- Status transitions are restricted to an allow-list.
+- Sensitive actions (status change, delete) require recent re-auth.
+- Key actions and failures are written to the audit log.
+"""
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -11,12 +20,13 @@ from accounts.views import require_recent_reauth
 from .models import Order
 from .forms import OrderForm, StaffOrderForm, OrderItemFormSet
 from menu.models import MenuItem
-from logs.utils import audit_log  # <-- logging utility
+from logs.utils import audit_log
 
 log = logging.getLogger("django")
 
 
 def _is_manager(user):
+    """Return True for manager/admin roles or superusers."""
     return getattr(user, "role", "") in {"manager", "admin"} or user.is_superuser
 
 

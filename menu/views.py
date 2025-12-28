@@ -1,4 +1,11 @@
-# menu/views.py
+"""Menu management views.
+
+Implements CRUD for menu items with RBAC enforcement:
+- Only manager/admin (or superuser) can access menu management pages.
+- All access control failures are fail-secure (generic 403) and audited.
+- Deletions are protected by a recent re-authentication requirement.
+"""
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
@@ -9,12 +16,13 @@ from accounts.views import require_recent_reauth
 
 from .forms import MenuItemForm
 from .models import MenuItem
-from logs.utils import audit_log  # <- centralized audit helper
+from logs.utils import audit_log
 
 log = logging.getLogger("django")
 
 
 def _is_manager(user):
+    """Return True for manager/admin roles or superusers."""
     return getattr(user, "role", None) in {"manager", "admin"} or user.is_superuser
 
 

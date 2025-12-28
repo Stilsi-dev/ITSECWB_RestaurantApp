@@ -1,10 +1,21 @@
-# accounts/models.py
+"""Models for authentication, RBAC, and password policy support.
+
+This app uses a custom `User` model to support:
+- Role-based access control via `role`.
+- Account lockout via `failed_logins` and `locked_until`.
+- Password policy metadata (change timestamp + security question/answer hash).
+- Optional last authentication event metadata for reporting/auditing.
+
+`PasswordHistory` stores previous password hashes to prevent reuse.
+"""
+
 from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
 class User(AbstractUser):
+    """Custom user model with additional security and RBAC fields."""
     # existing roles/lockout fields you had earlier
     role = models.CharField(max_length=20, default="customer")
     failed_logins = models.IntegerField(default=0)
@@ -16,6 +27,7 @@ class User(AbstractUser):
     security_answer_hash = models.CharField(max_length=128, blank=True)
 
     def mark_password_changed(self):
+        """Update the password change timestamp to enforce minimum password age."""
         self.password_changed_at = timezone.now()
         self.save(update_fields=["password_changed_at"])
     
@@ -25,6 +37,7 @@ class User(AbstractUser):
     last_auth_event_ua = models.TextField(blank=True, null=True)
 
     def is_locked_now(self):
+        """Return True if the account is currently locked out."""
         return bool(self.locked_until and timezone.now() < self.locked_until)
 
 

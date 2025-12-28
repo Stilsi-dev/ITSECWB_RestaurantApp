@@ -1,4 +1,3 @@
-# logs/views.py
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -13,14 +12,12 @@ User = get_user_model()
 
 @login_required
 def admin_logs_view(request):
-    # Only admins allowed
     if getattr(request.user, "role", "") != "admin" and not request.user.is_superuser:
         messages.error(request, "Not authorized!")
         return redirect("accounts:dashboard")
 
     qs = Log.objects.select_related("user").all()
 
-    # --- Filters ---
     user_filter = request.GET.get("user") or ""
     action_filter = request.GET.get("action") or ""
     status_filter = request.GET.get("status") or ""
@@ -37,14 +34,12 @@ def admin_logs_view(request):
     if status_filter:
         qs = qs.filter(status=status_filter)
 
-    # --- Sorting (whitelist) ---
     sort = request.GET.get("sort") or "-timestamp"
     allowed_sorts = {"timestamp", "-timestamp", "user__username", "-user__username", "status", "-status"}
     if sort not in allowed_sorts:
         sort = "-timestamp"
     qs = qs.order_by(sort)
 
-    # Distinct actions for the filter dropdown (case-insensitive, sorted)
     actions = (
         Log.objects.exclude(action__isnull=True)
         .exclude(action__exact="")
@@ -56,7 +51,6 @@ def admin_logs_view(request):
 
     users = User.objects.order_by("username")
 
-    # Optional pagination
     paginator = Paginator(qs, 25)  # 25 per page
     page_obj = paginator.get_page(request.GET.get("page"))
 
