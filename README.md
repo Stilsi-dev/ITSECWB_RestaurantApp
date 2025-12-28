@@ -1,49 +1,55 @@
 # ITSECWB_CS — Restaurant Web App (ITSECWB Project)
 
-A secure **Restaurant Management System** built with **Django**, implementing **Role-Based Access Control (RBAC)**, **audit logging**, **session security**, **account lockout**, **last login/attempt reporting**, **re-authentication for critical actions**, and strict **input validation** — designed to comply with the ITSECWB Machine Project Specifications and Secure Web Development Checklist.
+A secure **Restaurant Management System** built with **Django**. The app implements **Role-Based Access Control (RBAC)**, **audit logging**, **session security**, **account lockout**, **last login/attempt reporting**, **re-authentication for critical actions**, and strict **input validation** — aligned with the ITSECWB Machine Project Specifications and Secure Web Development Checklist.
 
 ---
 
-## **Sample Test Accounts**
+## Sample test accounts
 
-> ⚠️ **Security Notice:** These accounts are for **testing/demo purposes only**.  
+> ⚠️ Security notice: these accounts are for **testing/demo purposes only**.
+> If you publish this repository, do not include real credentials or a real database.
 > Do **NOT** use them in production — change or remove them before deployment.
 
-**1️⃣ Manager Account**  
+**Manager**
 - **Username:** `manager1`  
 - **Password:** `M@nager!2024`
 
-**2️⃣ Customer Account**  
+**Customer**
 - **Username:** `customer1`  
 - **Password:** `Cust0mer!2024`
 
-**3️⃣ Administrator Account**  
+**Administrator**
 - **Username:** `admin`  
 - **Password:** `admin1234!`
 
 ---
 
-## **Roles & Permissions**
+## Roles & permissions
 
-### **Administrator**
+### Administrator
 - Manage all user accounts & roles (Admin, Manager, Customer)
 - Create and assign elevated accounts
 - View and filter system audit logs (read-only)
 - Full system access
 
-### **Manager**
+### Manager
 - Manage menu items (CRUD)
 - View and update all customer orders
 - Change order statuses following allowed transitions
 
-### **Customer**
+### Customer
 - Self-register and log in
 - Place, view, and cancel their own orders (while pending)
 - View available menu items
 
 ---
 
-## **Setup Instructions**
+## Setup instructions
+
+Prerequisites:
+
+- Python 3.10+ recommended
+- pip
 
 1. **Clone the repository**
     ```bash
@@ -65,6 +71,8 @@ A secure **Restaurant Management System** built with **Django**, implementing **
     pip install -r requirements.txt
     ```
 
+  If you see an error about `django_extensions`, it means the dependency is missing from `requirements.txt`.
+
 4. **Run migrations**
     ```bash
     python manage.py migrate
@@ -84,9 +92,18 @@ A secure **Restaurant Management System** built with **Django**, implementing **
     - **Web:** `http://127.0.0.1:8000`
     - **Django Admin:** `http://127.0.0.1:8000/admin`
 
+Optional (start from a clean database):
+
+```bash
+# WARNING: deletes local dev database
+rm -f db.sqlite3
+python manage.py migrate
+python manage.py createsuperuser
+```
+
 ---
 
-## **Main URLs**
+## Main URLs
 
 ### Accounts
 - `/login/`, `/logout/`, `/register/`
@@ -115,7 +132,7 @@ A secure **Restaurant Management System** built with **Django**, implementing **
 
 ---
 
-## **Security Features**
+## Security features
 
 ### Authentication
 - All non-public routes require login  
@@ -169,7 +186,7 @@ A secure **Restaurant Management System** built with **Django**, implementing **
 
 ---
 
-## **Compliance Mapping (Checklist → Implementation)**
+## Compliance mapping (Checklist → Implementation)
 
 | Checklist Item | Status | Implemented In |
 |----------------|--------|----------------|
@@ -194,7 +211,8 @@ A secure **Restaurant Management System** built with **Django**, implementing **
 
 ---
 
-## **Production Recommendations**
+## Production recommendations
+
 Before deployment:
 - Set `DEBUG = False`
 - Use a strong `SECRET_KEY` from environment variables
@@ -208,5 +226,6 @@ Before deployment:
 
 ---
 
-## **License**
-MIT License – Free to use, modify, and distribute with attribution.
+## License
+
+MIT
